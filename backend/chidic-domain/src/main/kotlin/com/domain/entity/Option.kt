@@ -13,5 +13,5 @@ class Option(
     var question: Question,
 
     @Column(name = "is_corrected", nullable = false)
-    var isCorrected: Boolean = false
+    var isCorrected: Boolean
 )
