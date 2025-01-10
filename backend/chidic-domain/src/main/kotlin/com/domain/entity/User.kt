@@ -5,7 +5,7 @@ import java.util.UUID
 import jakarta.persistence.*
 
 @Entity
-data class User(
+class User(
     @Id
     @GeneratedValue
     val id: UUID = UUID.randomUUID(),
