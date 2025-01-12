@@ -19,7 +19,7 @@ class UserSolvedQuestion (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "selected_id", nullable = false)
-    var selectedOption: Option?,
+    var selectedOption: Options?,
 
     @Column(name = "is_corrected", nullable = false)
     var isCorrected: Boolean,

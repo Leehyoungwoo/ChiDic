@@ -13,10 +13,10 @@ class Follow (
     val id: FollowId,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "follower_id", nullable = false)
+    @JoinColumn(name = "follower_id", nullable = false, insertable = false, updatable = false)
     var follower: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "following_id", nullable = false)
+    @JoinColumn(name = "followee_id", nullable = false, insertable = false, updatable = false)
     var following: User,
 )

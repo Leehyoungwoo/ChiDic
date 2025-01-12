@@ -3,7 +3,7 @@ package com.domain.entity
 import jakarta.persistence.*
 
 @Entity
-class Option(
+class Options(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
