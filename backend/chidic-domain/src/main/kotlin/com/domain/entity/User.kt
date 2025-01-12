@@ -8,18 +8,18 @@ import jakarta.persistence.*
 class User(
     @Id
     @GeneratedValue
-    val id: UUID = UUID.randomUUID(),
+    var id: UUID = UUID.randomUUID(),
 
     @Column(nullable = false, unique = true, length = 100)
-    val username: String,
+    var username: String,
 
     @Column(nullable = false, unique = true, length = 255)
-    val email: String,
+    var email: String,
 
     @Column(unique = true, length = 255)
-    val profilePicture: String? = null,
+    var profilePicture: String? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val role: Role = Role.USER,
-)
+    var role: Role = Role.USER,
+): BaseEntity()
