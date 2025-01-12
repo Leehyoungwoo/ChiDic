@@ -1,11 +1,11 @@
-package com.chidic
+package com.chidicdomain
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class ChidicApplication
+class ChidicDomainApplication
 
 fun main(args: Array<String>) {
-	runApplication<ChidicApplication>(*args)
+    runApplication<ChidicDomainApplication>(*args)
 }
