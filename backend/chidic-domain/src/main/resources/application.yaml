@@ -6,5 +6,7 @@ spring:
     group:
       local:
         - db-local
+      test:
+        - db-local
     include:
       - db

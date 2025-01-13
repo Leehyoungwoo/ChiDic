@@ -35,10 +35,8 @@ subprojects {
         testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
         // JUnit 5: 최신 버전으로 JUnit 5를 사용할 수 있게 해주는 의존성
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-
-        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        testImplementation("org.junit.jupiter:junit-jupiter:5.10.0") 
+        testImplementation(kotlin("test"))
     }
 
     tasks.test {

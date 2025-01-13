@@ -1,15 +1,14 @@
 package com.domain.entity.id
 
-import java.io.Serializable
-import java.util.UUID
 import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
+import java.io.Serializable
 
 @Embeddable
 data class FollowId (
     @Column(name = "follower_id")
-    val followerId: UUID,
+    val followerId: Long,
 
     @Column(name = "following_id")
-    val followeeId: UUID
+    val followeeId: Long
 ) : Serializable

@@ -1,14 +1,14 @@
 package com.domain.entity
 
 import com.domain.entity.enum.Role
-import java.util.UUID
 import jakarta.persistence.*
 
 @Entity
+@Table(name = "users")
 class User(
     @Id
-    @GeneratedValue
-    var id: UUID = UUID.randomUUID(),
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long = 0,
 
     @Column(nullable = false, unique = true, length = 100)
     var username: String,
