@@ -4,8 +4,8 @@ import com.domain.entity.User
 import com.domain.entity.enum.Role
 import com.domain.mapper.UserMapper
 import com.domain.repository.UserRepository
-import com.dto.UserCreateDto
-import com.dto.UserUpdateDto
+import com.chidiccommon.dto.UserCreateDto
+import com.chidiccommon.dto.UserUpdateDto
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
