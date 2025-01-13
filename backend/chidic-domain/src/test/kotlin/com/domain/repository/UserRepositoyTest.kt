@@ -37,6 +37,7 @@ class UserRepositoryTest {
         val foundUser = userRepository.findByUsername("testuser")
 
         // Then: 결과 검증
+        assertEquals(1, foundUser?.id)
         assertEquals("testuser", foundUser?.username)
         assertEquals("testuser@example.com", foundUser?.email)
     }
