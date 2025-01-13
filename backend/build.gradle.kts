@@ -33,10 +33,12 @@ subprojects {
         testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 
         testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
         // JUnit 5: 최신 버전으로 JUnit 5를 사용할 수 있게 해주는 의존성
-        testImplementation("org.junit.jupiter:junit-jupiter:5.10.0") 
+        testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
         testImplementation(kotlin("test"))
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 
     tasks.test {
