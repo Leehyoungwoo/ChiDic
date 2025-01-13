@@ -24,4 +24,10 @@ class User(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var role: Role = Role.USER,
-): BaseEntity()
+
+
+): BaseEntity() {
+    fun updateProfileImage(newProfileImage: String) {
+        this.profilePicture = newProfileImage
+    }
+}
