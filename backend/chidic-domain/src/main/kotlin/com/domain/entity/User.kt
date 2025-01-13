@@ -1,25 +1,25 @@
 package com.domain.entity
 
 import com.domain.entity.enum.Role
-import java.util.UUID
 import jakarta.persistence.*
 
 @Entity
+@Table(name = "users")
 class User(
     @Id
-    @GeneratedValue
-    val id: UUID = UUID.randomUUID(),
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long = 0,
 
     @Column(nullable = false, unique = true, length = 100)
-    val username: String,
+    var username: String,
 
     @Column(nullable = false, unique = true, length = 255)
-    val email: String,
+    var email: String,
 
     @Column(unique = true, length = 255)
-    val profilePicture: String? = null,
+    var profilePicture: String? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val role: Role = Role.USER,
-)
+    var role: Role = Role.USER,
+): BaseEntity()
