@@ -14,6 +14,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.*
+import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class UserServiceImplTest {
@@ -50,5 +51,25 @@ class UserServiceImplTest {
 
         // then
         verify(userRepository, times(1)).save(any<User>())
+    }
+
+    @Test
+    fun delete() {
+        val user = User(
+            id = 1,
+            username = "테스트인",
+            email = "test@google.com",
+            profilePicture = null,
+            role = Role.USER
+        )
+
+        whenever(userRepository.findById(1)).thenReturn(Optional.of(user))
+
+        userService = UserServiceImpl(userMapper, userRepository)
+
+        userService.delete(1)
+
+        assertEquals(true, user.isDeleted)
+        verify(userRepository, times(1)).findById(1)
     }
 }

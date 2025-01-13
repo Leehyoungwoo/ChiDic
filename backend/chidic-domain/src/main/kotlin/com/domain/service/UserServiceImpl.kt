@@ -19,4 +19,10 @@ class UserServiceImpl(
         val newUser = userMapper.toEntity(userCreateDto)
         userRepository.save(newUser)
     }
+
+    @Transactional
+    override fun delete(id: Long): Unit {
+        var user = userRepository.findById(id).orElseThrow()
+        user.deleteData()
+    }
 }

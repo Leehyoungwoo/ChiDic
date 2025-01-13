@@ -1,6 +1,7 @@
 package com.domain.entity
 
 import jakarta.persistence.*
+import org.hibernate.annotations.SQLRestriction
 import java.time.LocalDateTime
 
 @MappedSuperclass

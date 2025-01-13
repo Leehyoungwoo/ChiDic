@@ -50,4 +50,20 @@ class UserRepositoryTest {
         // Then: null 반환 확인
         assertNull(foundUser)
     }
+
+    @Test
+    fun `deleted user should not be found`() {
+        // given
+        val user = User(
+            username = "testuser",
+            email = "testuser@example.com"
+        )
+        val saveUser = userRepository.save(user)
+        entityManager.flush();
+
+        saveUser.deleteData()
+
+        val foundUser = userRepository.findByUsername("testuser")
+        assertNull(foundUser)
+    }
 }

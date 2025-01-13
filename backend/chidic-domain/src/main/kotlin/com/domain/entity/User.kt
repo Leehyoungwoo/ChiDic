@@ -2,9 +2,11 @@ package com.domain.entity
 
 import com.domain.entity.enum.Role
 import jakarta.persistence.*
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
 @Table(name = "users")
+@SQLRestriction("is_deleted = false")
 class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

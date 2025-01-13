@@ -5,4 +5,5 @@ import com.dto.UserCreateDto
 
 interface UserService {
     fun create(user: UserCreateDto): Unit
+    fun delete(id: Long): Unit
 }
