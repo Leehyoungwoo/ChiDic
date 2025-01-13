@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.domain.entity.enum.Provider
+import com.chidicdomain.domain.entity.enum.Provider
 import jakarta.persistence.*
 import java.util.*
 

@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.domain.entity.enum.FriendStatus
+import com.chidicdomain.domain.entity.enum.FriendStatus
 import jakarta.persistence.*
 
 @Entity

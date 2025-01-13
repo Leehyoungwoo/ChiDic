@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.domain.entity.id.PostTagId
+import com.chidicdomain.domain.entity.id.PostTagId
 import jakarta.persistence.*
 
 @Entity

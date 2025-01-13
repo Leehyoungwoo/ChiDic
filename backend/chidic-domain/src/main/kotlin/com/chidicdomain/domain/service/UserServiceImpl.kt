@@ -1,10 +1,9 @@
 package com.chidicdomain.domain.service
 
-import com.domain.entity.User
-import com.domain.mapper.UserMapper
-import com.domain.repository.UserRepository
 import com.chidiccommon.dto.UserCreateDto
 import com.chidiccommon.dto.UserUpdateDto
+import com.chidicdomain.domain.mapper.UserMapper
+import com.chidicdomain.domain.repository.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

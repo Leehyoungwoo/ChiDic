@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.domain.entity.id.GroupChatParticipantId
+import com.chidicdomain.domain.entity.id.GroupChatParticipantId
 import jakarta.persistence.*
 import java.time.LocalDateTime
 

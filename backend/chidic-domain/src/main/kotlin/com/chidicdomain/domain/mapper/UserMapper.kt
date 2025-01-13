@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.mapper
 
-import com.domain.entity.User
+import com.chidicdomain.domain.entity.User
 import com.chidiccommon.dto.UserCreateDto
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
