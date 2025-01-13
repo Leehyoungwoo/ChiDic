@@ -2,9 +2,11 @@ package com.domain.entity
 
 import com.domain.entity.enum.Role
 import jakarta.persistence.*
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
 @Table(name = "users")
+@SQLRestriction("is_deleted = false")
 class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +24,10 @@ class User(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var role: Role = Role.USER,
-): BaseEntity()
+
+
+): BaseEntity() {
+    fun updateProfileImage(newProfileImage: String) {
+        this.profilePicture = newProfileImage
+    }
+}
