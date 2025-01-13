@@ -35,7 +35,7 @@ class UserServiceImplTest {
         )
 
         val user = User(
-            id = UUID.randomUUID(),
+            id = 1,
             username = "테스트인",
             email = "test@google.com",
             profilePicture = null,
