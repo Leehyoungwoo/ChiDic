@@ -2,6 +2,9 @@ package com.chidiccore.config
 
 import com.chidiccore.handler.common.CustomAccessDeniedHandler
 import com.chidiccore.handler.entrypoint.CustomAuthenticationEntryPoint
+import com.chidiccore.jwt.filter.JwtFilter
+import com.chidiccore.jwt.util.JwtProvider
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -10,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -18,9 +22,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 class SecurityConfig(
-    private final val URL_WHITE_LIST: Array<String> = arrayOf(
-        "/error", "/login", ""
-    )
+    @Value("\${spring.security.url-white-list}")
+    private val URL_WHITE_LIST: Array<String>,
+
+    private val jwtProvider: JwtProvider
 ) {
 
     @Bean
@@ -30,7 +35,8 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .cors { it.configurationSource(corsConfigurationSource()) }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .authorizeHttpRequests { it
+            .authorizeHttpRequests {
+                it
                     .requestMatchers(*URL_WHITE_LIST)
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/members")
@@ -42,11 +48,15 @@ class SecurityConfig(
             }
             .headers { }
             .oauth2Login { }
-            .exceptionHandling { it
-                .accessDeniedHandler(CustomAccessDeniedHandler())
-                .authenticationEntryPoint(CustomAuthenticationEntryPoint())
+            .exceptionHandling {
+                it
+                    .accessDeniedHandler(CustomAccessDeniedHandler())
+                    .authenticationEntryPoint(CustomAuthenticationEntryPoint())
             }
-
+            .addFilterBefore(
+                JwtFilter(jwtProvider),
+                UsernamePasswordAuthenticationFilter::class.java
+            )
 
         return http.build()
     }
