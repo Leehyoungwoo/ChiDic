@@ -1,7 +1,8 @@
 package com.domain.repository
 
 import com.chidicdomain.ChidicDomainApplication
-import com.domain.entity.User
+import com.chidicdomain.domain.entity.User
+import com.chidicdomain.domain.repository.UserRepository
 import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
