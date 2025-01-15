@@ -1,7 +1,10 @@
 package com.chidiccore.config
 
+import com.chidiccore.handler.common.CustomAccessDeniedHandler
+import com.chidiccore.handler.entrypoint.CustomAuthenticationEntryPoint
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -14,7 +17,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
-class SecurityConfig {
+class SecurityConfig(
+    private final val URL_WHITE_LIST: Array<String> = arrayOf(
+        "/error", "/login", ""
+    )
+) {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -23,10 +30,22 @@ class SecurityConfig {
             .formLogin { it.disable() }
             .cors { it.configurationSource(corsConfigurationSource()) }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .authorizeHttpRequests {  }
-            .headers {  }
-            .oauth2Login {  }
-            .exceptionHandling {  }
+            .authorizeHttpRequests { it
+                    .requestMatchers(*URL_WHITE_LIST)
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/members")
+                    .permitAll()
+                    .requestMatchers("/**")
+                    .hasAnyRole("ADMIN", "USER")
+                    .anyRequest()
+                    .authenticated()
+            }
+            .headers { }
+            .oauth2Login { }
+            .exceptionHandling { it
+                .accessDeniedHandler(CustomAccessDeniedHandler())
+                .authenticationEntryPoint(CustomAuthenticationEntryPoint())
+            }
 
 
         return http.build()
