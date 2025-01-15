@@ -20,4 +20,8 @@ class OAuth2UserDetails(
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         return mutableListOf(role).map { SimpleGrantedAuthority("ROLE_$it") }.toMutableList()
     }
+
+    fun getRole(): Role {
+        return role
+    }
 }

@@ -1,5 +1,7 @@
 package com.chidiccore.jwt.util
 
+import com.chidiccore.auth.model.OAuth2UserDetails
+import com.chidicdomain.domain.entity.enum.Role
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -30,7 +32,7 @@ class JwtProvider(
 
     @PostConstruct
     fun afterPropertiesSet() {
-        this.key = SecretKeySpec(Base64.getDecoder().decode(jwtSecretKey), "HmacSHA256")
+        key = SecretKeySpec(Base64.getDecoder().decode(jwtSecretKey), "HmacSHA256")
     }
 
     fun createAccessToken(authentication: Authentication): String {
@@ -42,15 +44,18 @@ class JwtProvider(
     }
 
     fun getOAuth2Authentication(token: String): Authentication? {
-        var claims: Claims? = Jwts.parser()
+        val claims: Claims? = Jwts.parser()
             .verifyWith(key)
             .build()
             .parseSignedClaims(token)
             .payload
 
-        var username = claims?.get("username").toString()
+        val principal = OAuth2UserDetails(
+            username = claims?.get("username").toString(),
+            role = Role.valueOf(claims?.get("role").toString())
+        )
 
-        return UsernamePasswordAuthenticationToken(null, null, null)
+        return UsernamePasswordAuthenticationToken(principal, token, principal.authorities)
     }
 
     fun validateToken(token: String): Boolean {
@@ -76,7 +81,8 @@ class JwtProvider(
 
     private fun createToken(
         authentication: Authentication,
-        tokenValidityInMilliseconds: Long): String {
+        tokenValidityInMilliseconds: Long
+    ): String {
         return Jwts.builder()
             .claim(AUTHORIZES_KEY, authentication.authorities
                 .stream()
@@ -91,7 +97,7 @@ class JwtProvider(
         return claims?.get(AUTHORIZES_KEY)
             ?.toString()
             ?.split(",")
-            ?.map {it.trim()}
+            ?.map { it.trim() }
             ?.filter { it.isNotBlank() }
             ?.map(::SimpleGrantedAuthority)
             .orEmpty()
