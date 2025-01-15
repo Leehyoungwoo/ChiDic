@@ -30,8 +30,7 @@ class JwtProvider(
 
     @PostConstruct
     fun afterPropertiesSet() {
-        val decodedBytes = Base64.getDecoder().decode(jwtSecretKey)
-        this.key = SecretKeySpec(decodedBytes, "HmacSHA256")
+        this.key = SecretKeySpec(Base64.getDecoder().decode(jwtSecretKey), "HmacSHA256")
     }
 
     fun createAccessToken(authentication: Authentication): String {
@@ -78,19 +77,13 @@ class JwtProvider(
     private fun createToken(
         authentication: Authentication,
         tokenValidityInMilliseconds: Long): String {
-        var authorities = authentication.authorities
-            .stream()
-            .map { obj: GrantedAuthority -> obj.authority }
-            .collect(Collectors.joining(","))
-
-        var now = System.currentTimeMillis()
-
-        var expiration = Date(now + tokenValidityInMilliseconds)
-
         return Jwts.builder()
-            .claim(AUTHORIZES_KEY, authorities)
+            .claim(AUTHORIZES_KEY, authentication.authorities
+                .stream()
+                .map { obj: GrantedAuthority -> obj.authority }
+                .collect(Collectors.joining(",")))
             .signWith(key)
-            .expiration(expiration)
+            .expiration(Date(System.currentTimeMillis() + tokenValidityInMilliseconds))
             .compact()
     }
 
