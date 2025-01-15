@@ -5,10 +5,9 @@ import com.chidiccore.jwt.util.JwtProvider
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
-import java.util.Objects
+import java.util.*
 
 class JwtFilter(
     private val jwtProvider: JwtProvider
