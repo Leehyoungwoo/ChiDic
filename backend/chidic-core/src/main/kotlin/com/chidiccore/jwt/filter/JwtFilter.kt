@@ -19,13 +19,9 @@ class JwtFilter(
         filterChain: FilterChain
     ) {
         var token = jwtProvider.resolveToken(request)
-        var requstURL = request.requestURL.toString()
 
         if (!StringUtil.isNullOrEmpty(token) && jwtProvider.validateToken(token!!)) {
-            var authentication: Authentication? = null
-            if (requstURL.equals("/oauth2/authorization/kakao")) {
-                authentication = jwtProvider.getOAuth2Authentication(token)
-            }
+            var authentication = jwtProvider.getOAuth2Authentication(token)
 
             if (Objects.nonNull(authentication)) {
                 SecurityContextHolder.getContext().authentication = authentication
