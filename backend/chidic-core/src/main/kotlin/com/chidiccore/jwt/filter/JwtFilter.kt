@@ -1,14 +1,11 @@
 package com.chidiccore.jwt.filter
 
-import ch.qos.logback.core.util.StringUtil
 import com.chidiccore.jwt.util.JwtProvider
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
-import java.util.Objects
 
 class JwtFilter(
     private val jwtProvider: JwtProvider
@@ -20,11 +17,9 @@ class JwtFilter(
     ) {
         var token = jwtProvider.resolveToken(request)
 
-        if (!StringUtil.isNullOrEmpty(token) && jwtProvider.validateToken(token!!)) {
-            var authentication = jwtProvider.getOAuth2Authentication(token)
-
-            if (Objects.nonNull(authentication)) {
-                SecurityContextHolder.getContext().authentication = authentication
+        if (!token.isNullOrEmpty() && jwtProvider.validateToken(token!!)) {
+            jwtProvider.getOAuth2Authentication(token)?.let {
+                SecurityContextHolder.getContext().authentication = it
             }
         }
 

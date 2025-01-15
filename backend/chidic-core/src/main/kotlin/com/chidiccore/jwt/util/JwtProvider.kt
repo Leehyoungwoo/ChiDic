@@ -1,5 +1,7 @@
 package com.chidiccore.jwt.util
 
+import com.chidiccore.auth.model.OAuth2UserDetails
+import com.chidicdomain.domain.entity.enum.Role
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.stream.Collectors
@@ -29,8 +32,7 @@ class JwtProvider(
 
     @PostConstruct
     fun afterPropertiesSet() {
-        val decodedBytes = Base64.getDecoder().decode(jwtSecretKey)
-        this.key = SecretKeySpec(decodedBytes, "HmacSHA256")
+        key = SecretKeySpec(Base64.getDecoder().decode(jwtSecretKey), "HmacSHA256")
     }
 
     fun createAccessToken(authentication: Authentication): String {
@@ -42,15 +44,18 @@ class JwtProvider(
     }
 
     fun getOAuth2Authentication(token: String): Authentication? {
-        var claims: Claims? = Jwts.parser()
+        val claims: Claims? = Jwts.parser()
             .verifyWith(key)
             .build()
             .parseSignedClaims(token)
             .payload
 
-        var username = claims?.get("username").toString()
+        val principal = OAuth2UserDetails(
+            username = claims?.get("username").toString(),
+            role = Role.valueOf(claims?.get("role").toString())
+        )
 
-        return UsernamePasswordAuthenticationToken(null, null, null)
+        return UsernamePasswordAuthenticationToken(principal, token, principal.authorities)
     }
 
     fun validateToken(token: String): Boolean {
@@ -76,24 +81,25 @@ class JwtProvider(
 
     private fun createToken(
         authentication: Authentication,
-        tokenValidityInMilliseconds: Long): String {
-        var authorities = authentication.authorities
-            .stream()
-            .map { obj: GrantedAuthority -> obj.authority }
-            .collect(Collectors.joining(","))
-
-        var now = System.currentTimeMillis()
-
-        var expiration = Date(now + tokenValidityInMilliseconds)
-
+        tokenValidityInMilliseconds: Long
+    ): String {
         return Jwts.builder()
-            .claim(AUTHORIZES_KEY, authorities)
+            .claim(AUTHORIZES_KEY, authentication.authorities
+                .stream()
+                .map { obj: GrantedAuthority -> obj.authority }
+                .collect(Collectors.joining(",")))
             .signWith(key)
-            .expiration(expiration)
+            .expiration(Date(System.currentTimeMillis() + tokenValidityInMilliseconds))
             .compact()
     }
 
-//    private fun getAuthorities(claims: Claims?): Any {
-//
-//    }
+    private fun getAuthorities(claims: Claims?): Any {
+        return claims?.get(AUTHORIZES_KEY)
+            ?.toString()
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotBlank() }
+            ?.map(::SimpleGrantedAuthority)
+            .orEmpty()
+    }
 }
