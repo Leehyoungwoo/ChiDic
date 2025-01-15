@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.stream.Collectors
@@ -93,7 +94,13 @@ class JwtProvider(
             .compact()
     }
 
-//    private fun getAuthorities(claims: Claims?): Any {
-//
-//    }
+    private fun getAuthorities(claims: Claims?): Any {
+        return claims?.get(AUTHORIZES_KEY)
+            ?.toString()
+            ?.split(",")
+            ?.map {it.trim()}
+            ?.filter { it.isNotBlank() }
+            ?.map(::SimpleGrantedAuthority)
+            .orEmpty()
+    }
 }
