@@ -3,7 +3,7 @@ package com.chidicapp
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = ["com.chidicapp", "com.chidiccore", "com.chidicdomain"])
 class ChidicAppApplication
 
 fun main(args: Array<String>) {
