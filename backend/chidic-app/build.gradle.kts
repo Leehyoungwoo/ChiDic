@@ -5,4 +5,7 @@ plugins {
 }
 
 dependencies {
+	implementation(project(":chidic-core"))
+	implementation(project(":chidic-domain"))
+	implementation(project(":chidic-common"))
 }

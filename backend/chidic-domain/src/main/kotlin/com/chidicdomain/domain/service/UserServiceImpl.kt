@@ -2,6 +2,7 @@ package com.chidicdomain.domain.service
 
 import com.chidiccommon.dto.UserCreateDto
 import com.chidiccommon.dto.UserUpdateDto
+import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.mapper.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -13,6 +14,9 @@ class UserServiceImpl(
     private val userMapper: UserMapper,
     private val userRepository: UserRepository
 ) : UserService {
+    override fun findUserByUsername(username: String): User? {
+        return userRepository.findByUsername(username)
+    }
 
     @Transactional
     override fun create(userCreateDto: UserCreateDto): Unit {

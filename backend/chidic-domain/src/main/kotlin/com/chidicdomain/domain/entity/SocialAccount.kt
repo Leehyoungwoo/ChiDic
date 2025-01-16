@@ -11,7 +11,7 @@ class SocialAccount (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: com.chidicdomain.domain.entity.User? = null,
+    var user: User? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
