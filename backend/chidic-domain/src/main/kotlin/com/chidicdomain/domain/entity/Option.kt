@@ -10,7 +10,7 @@ class Options(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
-    var question: com.chidicdomain.domain.entity.Question,
+    var question: Question,
 
     @Column(name = "is_corrected", nullable = false)
     var isCorrected: Boolean

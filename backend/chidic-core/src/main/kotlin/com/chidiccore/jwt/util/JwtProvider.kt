@@ -1,7 +1,7 @@
 package com.chidiccore.jwt.util
 
 import com.chidiccore.auth.model.OAuth2UserDetails
-import com.chidicdomain.domain.entity.enum.Role
+import com.chidiccommon.enum.Role
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts

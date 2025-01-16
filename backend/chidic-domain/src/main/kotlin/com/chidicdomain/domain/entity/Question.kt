@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.chidicdomain.domain.entity.enum.Category
+import com.chidiccommon.enum.Category
 import jakarta.persistence.*
 
 @Entity

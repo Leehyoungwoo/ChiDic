@@ -11,7 +11,7 @@ class UserSolvedQuestion (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
-    var question: com.chidicdomain.domain.entity.Question,
+    var question: Question,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -19,7 +19,7 @@ class UserSolvedQuestion (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "selected_id", nullable = false)
-    var selectedOption: com.chidicdomain.domain.entity.Options?,
+    var selectedOption: Options?,
 
     @Column(name = "is_corrected", nullable = false)
     var isCorrected: Boolean,

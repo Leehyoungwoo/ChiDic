@@ -12,11 +12,11 @@ class DirectMessage(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
-    val sender: com.chidicdomain.domain.entity.User,
+    val sender: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id", nullable = false)
-    val receiver: com.chidicdomain.domain.entity.User,
+    val receiver: User,
 
     @Column(nullable = false, length = 1000)
     val content: String,

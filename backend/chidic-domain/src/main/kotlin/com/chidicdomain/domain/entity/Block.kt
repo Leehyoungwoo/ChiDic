@@ -10,9 +10,9 @@ class Block(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: com.chidicdomain.domain.entity.User,
+    var user: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocked_user_id", nullable = false)
-    var blockedUser: com.chidicdomain.domain.entity.User
+    var blockedUser: User
 )

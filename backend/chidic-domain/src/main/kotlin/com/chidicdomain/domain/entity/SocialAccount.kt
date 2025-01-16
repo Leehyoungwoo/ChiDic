@@ -1,8 +1,7 @@
 package com.chidicdomain.domain.entity
 
-import com.chidicdomain.domain.entity.enum.Provider
+import com.chidiccommon.enum.Provider
 import jakarta.persistence.*
-import java.util.*
 
 @Entity
 class SocialAccount (
@@ -12,7 +11,7 @@ class SocialAccount (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: com.chidicdomain.domain.entity.User? = null,
+    var user: User? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

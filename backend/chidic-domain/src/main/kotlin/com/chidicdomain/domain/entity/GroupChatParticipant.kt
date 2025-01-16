@@ -11,11 +11,11 @@ class GroupChatParticipant(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "groupchat_id")
-    var groupChat: com.chidicdomain.domain.entity.GroupChat,
+    var groupChat: GroupChat,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "participant_id")
-    var user: com.chidicdomain.domain.entity.User,
+    var user: User,
 
     @Column(nullable = false, name = "join_at")
     var joinAt: LocalDateTime = LocalDateTime.now(),

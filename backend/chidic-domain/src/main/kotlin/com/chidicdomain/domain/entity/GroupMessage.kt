@@ -11,11 +11,11 @@ class GroupMessage(
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: com.chidicdomain.domain.entity.User,
+    var user: User,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "groupchat_id", nullable = false)
-    var groupChat: com.chidicdomain.domain.entity.GroupChat,
+    var groupChat: GroupChat,
 
     @Column(name = "content", nullable = false, length = 255)
     var content: String,

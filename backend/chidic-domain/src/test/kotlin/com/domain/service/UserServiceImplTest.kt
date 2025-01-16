@@ -3,7 +3,7 @@ package com.domain.service
 import com.chidiccommon.dto.UserCreateDto
 import com.chidiccommon.dto.UserUpdateDto
 import com.chidicdomain.domain.entity.User
-import com.chidicdomain.domain.entity.enum.Role
+import com.chidiccommon.enum.Role
 import com.chidicdomain.domain.mapper.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.domain.service.UserServiceImpl

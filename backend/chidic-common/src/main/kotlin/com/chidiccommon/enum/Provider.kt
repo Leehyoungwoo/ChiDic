@@ -1,4 +1,4 @@
-package com.chidicdomain.domain.entity.enum
+package com.chidiccommon.enum
 
 enum class Provider {
     NAVER,

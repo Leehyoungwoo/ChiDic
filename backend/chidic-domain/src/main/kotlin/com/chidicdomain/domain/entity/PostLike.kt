@@ -10,9 +10,9 @@ class PostLike(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false, insertable = false, updatable = false)
-    var post: com.chidicdomain.domain.entity.FeedPost,
+    var post: FeedPost,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
-    var user: com.chidicdomain.domain.entity.User
+    var user: User
 )
