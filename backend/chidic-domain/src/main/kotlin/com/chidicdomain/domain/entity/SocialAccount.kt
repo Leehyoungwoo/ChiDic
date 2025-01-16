@@ -1,8 +1,7 @@
 package com.chidicdomain.domain.entity
 
-import com.chidicdomain.domain.entity.enum.Provider
+import com.chidiccommon.enum.Provider
 import jakarta.persistence.*
-import java.util.*
 
 @Entity
 class SocialAccount (

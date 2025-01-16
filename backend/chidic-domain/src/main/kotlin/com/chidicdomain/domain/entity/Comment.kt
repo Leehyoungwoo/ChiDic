@@ -10,11 +10,11 @@ class Comment (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feedpost_id", nullable = false)
-    var feedpost: com.chidicdomain.domain.entity.FeedPost,
+    var feedpost: FeedPost,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: com.chidicdomain.domain.entity.User,
+    var user: User,
 
     @Column(name = "content", nullable = false, length = 255)
     var content: String

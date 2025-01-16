@@ -14,9 +14,9 @@ class Follow (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id", nullable = false, insertable = false, updatable = false)
-    var follower: com.chidicdomain.domain.entity.User,
+    var follower: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "followee_id", nullable = false, insertable = false, updatable = false)
-    var following: com.chidicdomain.domain.entity.User,
+    var following: User,
 )

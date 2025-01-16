@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.chidicdomain.domain.entity.enum.FriendStatus
+import com.chidiccommon.enum.FriendStatus
 import jakarta.persistence.*
 
 @Entity
@@ -11,11 +11,11 @@ class Friend (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: com.chidicdomain.domain.entity.User,
+    var user: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "friend_id", nullable = false)
-    var friend: com.chidicdomain.domain.entity.Friend,
+    var friend: Friend,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

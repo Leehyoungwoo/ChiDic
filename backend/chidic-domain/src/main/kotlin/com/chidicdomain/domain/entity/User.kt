@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.chidicdomain.domain.entity.enum.Role
+import com.chidiccommon.enum.Role
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
 
@@ -26,7 +26,7 @@ class User(
     var role: Role = Role.USER,
 
 
-): com.chidicdomain.domain.entity.BaseEntity() {
+    ): com.chidicdomain.domain.entity.BaseEntity() {
     fun updateProfileImage(newProfileImage: String) {
         this.profilePicture = newProfileImage
     }

@@ -1,6 +1,6 @@
 package com.chidiccore.auth.model
 
-import com.chidicdomain.domain.entity.enum.Role
+import com.chidiccommon.enum.Role
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.core.user.OAuth2User

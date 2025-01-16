@@ -10,9 +10,9 @@ class GroupChatReadStatus (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "groupchat_id", nullable = false)
-    var groupChat: com.chidicdomain.domain.entity.GroupChat,
+    var groupChat: GroupChat,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var user: com.chidicdomain.domain.entity.User,
+    var user: User,
 )

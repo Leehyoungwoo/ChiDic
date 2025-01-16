@@ -10,9 +10,9 @@ class PostTag (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", insertable = false, updatable = false, nullable = false)
-    var feedPost: com.chidicdomain.domain.entity.FeedPost,
+    var feedPost: FeedPost,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
-    var tag: com.chidicdomain.domain.entity.Tag
+    var tag: Tag
 )
