@@ -101,22 +101,15 @@ class JwtProvider(
         authentication: Authentication,
         tokenValidityInMilliseconds: Long
     ): String {
-        val currentTimeMillis = System.currentTimeMillis()
-        val expirationTime = currentTimeMillis + tokenValidityInMilliseconds
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val formattedTime = dateFormat.format(Date(currentTimeMillis))
-        println("현재 시간: $formattedTime")
-        val newFomattedTime = dateFormat.format(Date(expirationTime))
-        println("더해진 시간: $newFomattedTime")
-        System.out.println(java.util.TimeZone.getDefault().getID());
         return Jwts.builder()
             .claim(AUTHORIZES_KEY, authentication.authorities
                 .stream()
                 .map { obj: GrantedAuthority -> obj.authority }
                 .collect(Collectors.joining(",")))
             .claim("id", (authentication.principal as OAuth2UserDetails).getId())
+            .claim("role", (authentication.principal as OAuth2UserDetails).getRole().toString())
             .signWith(key)
-            .expiration(Date(expirationTime))
+            .expiration(Date(System.currentTimeMillis() + tokenValidityInMilliseconds))
             .compact()
     }
 
