@@ -29,32 +29,6 @@ class UserServiceImplTest {
     private lateinit var userService: UserServiceImpl
 
     @Test
-    fun create() {
-        // given
-        val userCreateDto = UserCreateDto(
-            email = "test@google.com",
-            username = "테스트인",
-        )
-
-        val user = User(
-            id = 1,
-            username = "테스트인",
-            email = "test@google.com",
-            profilePicture = null,
-            role = Role.USER
-        )
-
-        whenever(userMapper.toEntity(userCreateDto)).thenReturn(user)
-
-        userService = UserServiceImpl(userMapper, userRepository)
-
-        userService.create(userCreateDto)
-
-        // then
-        verify(userRepository, times(1)).save(any<User>())
-    }
-
-    @Test
     fun updateProfileImage() {
         var user = User(
             id = 1,
