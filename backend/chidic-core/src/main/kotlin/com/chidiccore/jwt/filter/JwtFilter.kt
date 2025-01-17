@@ -15,7 +15,7 @@ class JwtFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        var token = jwtProvider.resolveToken(request)
+        val token = jwtProvider.resolveToken(request)
 
         if (!token.isNullOrEmpty() && jwtProvider.validateToken(token!!)) {
             jwtProvider.getOAuth2Authentication(token)?.let {

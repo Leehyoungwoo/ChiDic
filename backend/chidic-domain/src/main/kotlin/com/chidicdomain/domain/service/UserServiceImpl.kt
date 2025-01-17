@@ -15,7 +15,7 @@ class UserServiceImpl(
     private val userRepository: UserRepository
 ) : UserService {
     override fun findUserByUsername(username: String): User? {
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsername(username).orElse(null)
     }
 
     @Transactional
