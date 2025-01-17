@@ -25,9 +25,14 @@ class User(
     @Column(nullable = false)
     var role: Role = Role.USER,
 
-
-    ): com.chidicdomain.domain.entity.BaseEntity() {
+    ): BaseEntity() {
     fun updateProfileImage(newProfileImage: String) {
         this.profilePicture = newProfileImage
+    }
+
+    override fun onPrePersist() {
+        if (role == null) {
+            role = Role.USER
+        }
     }
 }

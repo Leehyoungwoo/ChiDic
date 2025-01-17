@@ -1,7 +1,6 @@
 package com.chidicdomain.domain.service
 
 import com.chidiccommon.dto.OAuth2UserInfo
-import com.chidiccommon.dto.UserCreateDto
 import com.chidiccommon.dto.UserUpdateDto
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.mapper.UserMapper

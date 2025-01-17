@@ -1,7 +1,9 @@
 package com.chidicdomain.domain.entity
 
-import jakarta.persistence.*
-import org.hibernate.annotations.SQLRestriction
+import jakarta.persistence.Column
+import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
 import java.time.LocalDateTime
 
 @MappedSuperclass
@@ -21,6 +23,11 @@ abstract class BaseEntity {
     fun prePersist() {
         this.isDeleted = false
         this.createdAt = LocalDateTime.now()
+        onPrePersist()
+    }
+
+    protected open fun onPrePersist() {
+
     }
 
     @PreUpdate

@@ -1,6 +1,5 @@
 package com.domain.service
 
-import com.chidiccommon.dto.UserCreateDto
 import com.chidiccommon.dto.UserUpdateDto
 import com.chidicdomain.domain.entity.User
 import com.chidiccommon.enum.Role

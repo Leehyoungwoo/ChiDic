@@ -25,7 +25,7 @@ class SecurityConfig(
 ) {
 
     private val URL_WHITE_LIST: List<String> = listOf(
-        "/error", "/login", "/signup", "/api/login/kakao"
+        "/error", "/login", "/signup", "/api/login/kakao", "/oauth2/authorization/kakao", "/login/oauth2/code/kakao"
     )
 
     @Bean
