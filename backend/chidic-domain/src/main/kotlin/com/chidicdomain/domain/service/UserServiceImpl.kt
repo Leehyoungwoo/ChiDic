@@ -1,5 +1,6 @@
 package com.chidicdomain.domain.service
 
+import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserCreateDto
 import com.chidiccommon.dto.UserUpdateDto
 import com.chidicdomain.domain.entity.User
@@ -19,9 +20,9 @@ class UserServiceImpl(
     }
 
     @Transactional
-    override fun create(userCreateDto: UserCreateDto): Unit {
-        val newUser = userMapper.toEntity(userCreateDto)
-        userRepository.save(newUser)
+    override fun create(oAuth2UserInfo: OAuth2UserInfo): User {
+        val newUser = userMapper.toEntity(oAuth2UserInfo)
+        return userRepository.save(newUser)
     }
 
     @Transactional

@@ -4,7 +4,6 @@ import com.chidiccore.handler.common.CustomAccessDeniedHandler
 import com.chidiccore.handler.entrypoint.CustomAuthenticationEntryPoint
 import com.chidiccore.jwt.filter.JwtFilter
 import com.chidiccore.jwt.util.JwtProvider
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -22,22 +21,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 class SecurityConfig(
-    @Value("\${spring.security.url-white-list}")
-    private val URL_WHITE_LIST: Array<String>,
-
     private val jwtProvider: JwtProvider
 ) {
+
+    private val URL_WHITE_LIST: List<String> = listOf(
+        "/error", "/login", "/signup", "/api/login/kakao"
+    )
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
             .formLogin { it.disable() }
+            .oauth2Login { it.disable() }
             .cors { it.configurationSource(corsConfigurationSource()) }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers(*URL_WHITE_LIST)
+                    .requestMatchers(*URL_WHITE_LIST.toTypedArray())
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/members")
                     .permitAll()
@@ -47,7 +48,6 @@ class SecurityConfig(
                     .authenticated()
             }
             .headers { }
-            .oauth2Login { }
             .exceptionHandling {
                 it
                     .accessDeniedHandler(CustomAccessDeniedHandler())
