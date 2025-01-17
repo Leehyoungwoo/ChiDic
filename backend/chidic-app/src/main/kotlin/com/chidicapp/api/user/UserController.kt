@@ -17,4 +17,10 @@ class UserController(
                            @RequestBody userUpdateDto: UserUpdateDto) {
         userService.updateProfileImage(id, userUpdateDto)
     }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.OK)
+    fun deleteUser(@GetUserIdFromPrincipal id: Long) {
+        userService.delete(id)
+    }
 }
