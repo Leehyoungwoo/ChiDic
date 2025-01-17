@@ -13,7 +13,8 @@ import org.springframework.web.client.RestTemplate
 class KakaoOAuth2Service(
     private val restTemplate: RestTemplate,
     private val objectMapper: ObjectMapper,
-    @Value("\${spring.security.oauth2.client.registration.provider.kakao.user-info-uri}") private val kakaoUserInfoURL: String
+    @Value("\${spring.security.oauth2.client.provider.kakao.user-info-uri}")
+    private val kakaoUserInfoURL: String
 ): OAuthService {
 
     override fun getUserInfo(accessToken: String): OAuth2UserInfo {
