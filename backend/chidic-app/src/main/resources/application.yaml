@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active:
+      - local
+      - common
+    group:
+      local:
+        - security-local
+        - db-local
+    include:
+      - security
+      - db
