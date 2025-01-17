@@ -2,6 +2,7 @@ package com.chidiccore.jwt.util
 
 import com.chidiccore.auth.model.OAuth2UserDetails
 import com.chidiccommon.enum.Role
+import com.chidicdomain.domain.entity.User
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -56,6 +57,16 @@ class JwtProvider(
         )
 
         return UsernamePasswordAuthenticationToken(principal, token, principal.authorities)
+    }
+
+    fun getOAuth2Authentication(user: User): Authentication {
+        val authorities = listOf(SimpleGrantedAuthority("ROLE_USER"))
+        val principal = OAuth2UserDetails(
+            username = user.username,
+            role = user.role
+        )
+
+        return UsernamePasswordAuthenticationToken(principal, null, authorities)
     }
 
     fun validateToken(token: String): Boolean {
