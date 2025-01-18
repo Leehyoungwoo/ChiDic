@@ -1,6 +1,7 @@
 package com.domain.service
 
 import com.chidiccommon.dto.UserProfileImageUpdateDto
+import com.chidiccommon.enum.Provider
 import com.chidicdomain.domain.entity.User
 import com.chidiccommon.enum.Role
 import com.chidicdomain.domain.mapper.UserMapper
@@ -34,7 +35,8 @@ class UserServiceImplTest {
             username = "테스트인",
             email = "test@google.com",
             profilePicture = null,
-            role = Role.USER
+            role = Role.USER,
+            provider = Provider.KAKAO
         )
 
         var userProfileImageUpdateDto = UserProfileImageUpdateDto(
@@ -58,7 +60,8 @@ class UserServiceImplTest {
             username = "테스트인",
             email = "test@google.com",
             profilePicture = null,
-            role = Role.USER
+            role = Role.USER,
+            provider = Provider.KAKAO
         )
 
         whenever(userRepository.findById(1)).thenReturn(Optional.of(user))
