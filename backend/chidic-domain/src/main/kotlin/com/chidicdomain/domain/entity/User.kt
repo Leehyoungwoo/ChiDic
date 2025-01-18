@@ -30,6 +30,10 @@ class User(
         this.profilePicture = newProfileImage
     }
 
+    fun updateUsername(newUsername: String) {
+        username = newUsername
+    }
+
     override fun onPrePersist() {
         if (role == null) {
             role = Role.USER

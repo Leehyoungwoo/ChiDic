@@ -2,6 +2,7 @@ package com.chidicdomain.domain.service
 
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserProfileImageUpdateDto
+import com.chidiccommon.dto.UsernameUpdateDto
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.mapper.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
@@ -28,6 +29,12 @@ class UserServiceImpl(
     override fun updateProfileImage(id: Long, userProfileImageUpdateDto: UserProfileImageUpdateDto): Unit {
         var user = userRepository.findById(id).orElseThrow()
         user.updateProfileImage(userProfileImageUpdateDto.newImage)
+    }
+
+    @Transactional
+    override fun updateUsername(id: Long, usernameUpdateDto: UsernameUpdateDto) {
+        var user = userRepository.findById(id).orElseThrow()
+        user.updateUsername(usernameUpdateDto.username)
     }
 
     @Transactional
