@@ -1,6 +1,7 @@
 package com.domain.service
 
-import com.chidiccommon.dto.UserUpdateDto
+import com.chidiccommon.dto.UserProfileImageUpdateDto
+import com.chidiccommon.enum.Provider
 import com.chidicdomain.domain.entity.User
 import com.chidiccommon.enum.Role
 import com.chidicdomain.domain.mapper.UserMapper
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -35,10 +35,11 @@ class UserServiceImplTest {
             username = "테스트인",
             email = "test@google.com",
             profilePicture = null,
-            role = Role.USER
+            role = Role.USER,
+            provider = Provider.KAKAO
         )
 
-        var userUpdateDto = UserUpdateDto(
+        var userProfileImageUpdateDto = UserProfileImageUpdateDto(
             newImage = "새로운 이미지"
         )
 
@@ -46,10 +47,10 @@ class UserServiceImplTest {
 
         userService = UserServiceImpl(userMapper, userRepository)
 
-        userService.updateProfileImage(1, userUpdateDto)
+        userService.updateProfileImage(1, userProfileImageUpdateDto)
 
         verify(userRepository, times(1)).findById(1)
-        assertEquals(user.profilePicture, userUpdateDto.newImage)
+        assertEquals(user.profilePicture, userProfileImageUpdateDto.newImage)
     }
 
     @Test
@@ -59,7 +60,8 @@ class UserServiceImplTest {
             username = "테스트인",
             email = "test@google.com",
             profilePicture = null,
-            role = Role.USER
+            role = Role.USER,
+            provider = Provider.KAKAO
         )
 
         whenever(userRepository.findById(1)).thenReturn(Optional.of(user))

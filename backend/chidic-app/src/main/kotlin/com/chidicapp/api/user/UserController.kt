@@ -1,6 +1,7 @@
 package com.chidicapp.api.user
 
-import com.chidiccommon.dto.UserUpdateDto
+import com.chidiccommon.dto.UserProfileImageUpdateDto
+import com.chidiccommon.dto.UsernameUpdateDto
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.UserService
 import org.springframework.http.HttpStatus
@@ -14,8 +15,15 @@ class UserController(
     @PatchMapping("/profile-picture")
     @ResponseStatus(HttpStatus.OK)
     fun updateProfileImage(@GetUserIdFromPrincipal id: Long,
-                           @RequestBody userUpdateDto: UserUpdateDto) {
-        userService.updateProfileImage(id, userUpdateDto)
+                           @RequestBody userProfileImageUpdateDto: UserProfileImageUpdateDto) {
+        userService.updateProfileImage(id, userProfileImageUpdateDto)
+    }
+
+    @PatchMapping("/username")
+    @ResponseStatus(HttpStatus.OK)
+    fun updateUsername(@GetUserIdFromPrincipal userId: Long,
+                       @RequestBody usernameUpdateDto: UsernameUpdateDto) {
+        userService.updateUsername(userId, usernameUpdateDto)
     }
 
     @DeleteMapping
