@@ -35,4 +35,10 @@ class User(
             role = Role.USER
         }
     }
+
+    override fun deleteData() {
+        super.deleteData()
+        username = "deleted_user_${username}"
+        email = "deleted_user_${email}"
+    }
 }
