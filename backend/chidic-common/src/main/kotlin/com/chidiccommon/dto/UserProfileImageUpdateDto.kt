@@ -1,5 +1,5 @@
 package com.chidiccommon.dto
 
-data class UserUpdateDto (
+data class UserProfileImageUpdateDto (
     var newImage: String
 )
