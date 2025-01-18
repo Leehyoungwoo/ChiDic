@@ -3,6 +3,8 @@ package com.chidicdomain.domain.service
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserProfileImageUpdateDto
 import com.chidiccommon.dto.UsernameUpdateDto
+import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
+import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.mapper.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
@@ -27,19 +29,22 @@ class UserServiceImpl(
 
     @Transactional
     override fun updateProfileImage(id: Long, userProfileImageUpdateDto: UserProfileImageUpdateDto): Unit {
-        var user = userRepository.findById(id).orElseThrow()
+        val user = userRepository.findById(id)
+            .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
         user.updateProfileImage(userProfileImageUpdateDto.newImage)
     }
 
     @Transactional
     override fun updateUsername(id: Long, usernameUpdateDto: UsernameUpdateDto) {
-        var user = userRepository.findById(id).orElseThrow()
+        val user = userRepository.findById(id)
+            .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
         user.updateUsername(usernameUpdateDto.username)
     }
 
     @Transactional
     override fun delete(id: Long): Unit {
-        var user = userRepository.findById(id).orElseThrow()
+        val user = userRepository.findById(id)
+            .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
         user.deleteData()
     }
 }
