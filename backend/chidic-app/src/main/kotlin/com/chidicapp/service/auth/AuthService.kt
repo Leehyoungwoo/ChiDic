@@ -2,6 +2,7 @@ package com.chidicapp.service.auth
 
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.TokenResponse
+import com.chidiccommon.enum.Provider
 import com.chidiccore.jwt.util.JwtProvider
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.service.UserService
@@ -16,7 +17,7 @@ class AuthService(
     fun loginOrRegister(kakaoAccessToken: String): TokenResponse {
         val kakaoUser = kakaoOAuth2Service.getUserInfo(kakaoAccessToken)
 
-        val user = userService.findUserByUsername(kakaoUser.username) ?: registerUser(kakaoUser)
+        val user = userService.findUserByEmailAndProvider(kakaoUser.username, Provider.KAKAO) ?: registerUser(kakaoUser)
 
         val authentication = jwtProvider.getOAuth2Authentication(user)
 
@@ -29,6 +30,6 @@ class AuthService(
     }
 
     private fun registerUser(kakaoUserInfo: OAuth2UserInfo): User {
-        return userService.create(kakaoUserInfo)
+        return userService.create(kakaoUserInfo, Provider.KAKAO)
     }
 }

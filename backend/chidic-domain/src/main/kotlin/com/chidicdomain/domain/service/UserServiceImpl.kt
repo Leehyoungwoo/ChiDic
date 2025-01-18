@@ -3,6 +3,7 @@ package com.chidicdomain.domain.service
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserProfileImageUpdateDto
 import com.chidiccommon.dto.UsernameUpdateDto
+import com.chidiccommon.enum.Provider
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.User
@@ -17,13 +18,13 @@ class UserServiceImpl(
     private val userMapper: UserMapper,
     private val userRepository: UserRepository
 ) : UserService {
-    override fun findUserByUsername(username: String): User? {
-        return userRepository.findByUsername(username).orElse(null)
+    override fun findUserByEmailAndProvider(email: String, provider: Provider): User? {
+        return userRepository.findByEmailAndProvider(email, provider).orElse(null)
     }
 
     @Transactional
-    override fun create(oAuth2UserInfo: OAuth2UserInfo): User {
-        val newUser = userMapper.toEntity(oAuth2UserInfo)
+    override fun create(oAuth2UserInfo: OAuth2UserInfo, provider: Provider): User {
+        val newUser = userMapper.toEntity(oAuth2UserInfo, provider)
         return userRepository.save(newUser)
     }
 

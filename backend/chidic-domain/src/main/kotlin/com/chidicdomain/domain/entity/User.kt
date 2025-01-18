@@ -1,5 +1,6 @@
 package com.chidicdomain.domain.entity
 
+import com.chidiccommon.enum.Provider
 import com.chidiccommon.enum.Role
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
@@ -15,7 +16,7 @@ class User(
     @Column(nullable = false, unique = true, length = 100)
     var username: String,
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column(nullable = false, length = 255)
     var email: String,
 
     @Column(unique = true, length = 255)
@@ -24,6 +25,10 @@ class User(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var role: Role = Role.USER,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    var provider: Provider
 
     ): BaseEntity() {
     fun updateProfileImage(newProfileImage: String) {
