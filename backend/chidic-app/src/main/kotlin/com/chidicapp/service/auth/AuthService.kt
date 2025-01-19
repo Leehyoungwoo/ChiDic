@@ -1,7 +1,7 @@
 package com.chidicapp.service.auth
 
 import com.chidiccommon.dto.OAuth2UserInfo
-import com.chidiccommon.dto.TokenResponse
+import com.chidiccommon.dto.TokenDto
 import com.chidiccommon.enum.Provider
 import com.chidiccore.jwt.util.JwtProvider
 import com.chidicdomain.domain.entity.User
@@ -14,7 +14,7 @@ class AuthService(
     private val kakaoOAuth2Service: KakaoOAuth2Service,
     private val jwtProvider: JwtProvider
 ) {
-    fun loginOrRegister(kakaoAccessToken: String): TokenResponse {
+    fun loginOrRegister(kakaoAccessToken: String): TokenDto {
         val kakaoUser = kakaoOAuth2Service.getUserInfo(kakaoAccessToken)
 
         val user = userService.findUserByEmailAndProvider(kakaoUser.username, Provider.KAKAO) ?: registerUser(kakaoUser)
@@ -24,9 +24,7 @@ class AuthService(
         val accessToken = jwtProvider.createAccessToken(authentication)
         val refreshToken = jwtProvider.createRefreshToken(authentication)
 
-        // redis에 refreshToken 넣어주는 로직
-
-        return TokenResponse(accessToken, refreshToken)
+        return TokenDto(accessToken, refreshToken)
     }
 
     private fun registerUser(kakaoUserInfo: OAuth2UserInfo): User {
