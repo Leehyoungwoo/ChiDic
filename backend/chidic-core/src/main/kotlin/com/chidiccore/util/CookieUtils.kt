@@ -14,5 +14,14 @@ class CookieUtils {
             cookie.maxAge = 60 * 60 * 24 * 7
             response.addCookie(cookie)
         }
+
+        fun deleteRefreshTokenCookie(response: HttpServletResponse) {
+            val cookie = Cookie("refresh_token", "")
+            cookie.isHttpOnly = true
+            cookie.secure = true
+            cookie.path = "/api/refresh"
+            cookie.maxAge = 0
+            response.addCookie(cookie)
+        }
     }
 }

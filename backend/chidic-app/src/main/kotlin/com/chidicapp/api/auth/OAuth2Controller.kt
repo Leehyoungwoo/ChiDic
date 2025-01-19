@@ -2,7 +2,6 @@ package com.chidicapp.api.auth
 
 import com.chidicapp.service.auth.AuthService
 import com.chidiccommon.dto.TokenResponse
-import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidiccore.util.CookieUtils
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
@@ -36,5 +35,11 @@ class OAuth2Controller(
         return TokenResponse(
             accessToken = tokenDto.accessToken
         )
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
+    fun logout(response: HttpServletResponse) {
+        CookieUtils.deleteRefreshTokenCookie(response)
     }
 }
