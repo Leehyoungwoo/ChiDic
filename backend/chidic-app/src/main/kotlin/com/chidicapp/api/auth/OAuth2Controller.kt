@@ -1,8 +1,8 @@
 package com.chidicapp.api.auth
 
 import com.chidicapp.service.auth.AuthService
-import com.chidiccommon.dto.TokenDto
 import com.chidiccommon.dto.TokenResponse
+import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidiccore.util.CookieUtils
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
@@ -17,6 +17,19 @@ class OAuth2Controller(
     @ResponseStatus(HttpStatus.OK)
     fun login(@RequestHeader("X-Kakao-Token") kakaoToken: String, response: HttpServletResponse): TokenResponse {
         val tokenDto = authService.loginOrRegister(kakaoToken)
+
+        CookieUtils.addRefreshTokenCookie(response, tokenDto.refreshToken)
+
+        return TokenResponse(
+            accessToken = tokenDto.accessToken
+        )
+    }
+
+    @PostMapping("/refresh")
+    @ResponseStatus(HttpStatus.OK)
+    fun refreshToken(@CookieValue("refresh_token") refreshToken: String,
+                     response: HttpServletResponse): TokenResponse {
+        val tokenDto = authService.refreshAccessToken(refreshToken)
 
         CookieUtils.addRefreshTokenCookie(response, tokenDto.refreshToken)
 

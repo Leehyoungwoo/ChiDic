@@ -46,7 +46,7 @@ class JwtProvider(
         return createToken(authentication, this.refreshValidityInMilliseconds)
     }
 
-    fun getOAuth2Authentication(token: String): Authentication? {
+    fun getOAuth2Authentication(token: String): Authentication {
         val claims: Claims? = Jwts.parser()
             .verifyWith(key)
             .build()

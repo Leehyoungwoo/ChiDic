@@ -30,4 +30,15 @@ class AuthService(
     private fun registerUser(kakaoUserInfo: OAuth2UserInfo): User {
         return userService.create(kakaoUserInfo, Provider.KAKAO)
     }
+
+    fun refreshAccessToken(refreshToken: String): TokenDto {
+        jwtProvider.validateToken(refreshToken)
+
+        val authentication = jwtProvider.getOAuth2Authentication(refreshToken)
+
+        val accessToken = jwtProvider.createAccessToken(authentication)
+        val newRefreshToken = jwtProvider.createRefreshToken(authentication)
+
+        return TokenDto(accessToken, newRefreshToken)
+    }
 }
