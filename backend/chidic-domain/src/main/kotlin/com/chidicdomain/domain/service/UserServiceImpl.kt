@@ -1,6 +1,7 @@
 package com.chidicdomain.domain.service
 
 import com.chidiccommon.dto.OAuth2UserInfo
+import com.chidiccommon.dto.UserInfoResponse
 import com.chidiccommon.dto.UserProfileImageUpdateDto
 import com.chidiccommon.dto.UsernameUpdateDto
 import com.chidiccommon.enum.Provider
@@ -18,6 +19,12 @@ class UserServiceImpl(
     private val userMapper: UserMapper,
     private val userRepository: UserRepository
 ) : UserService {
+    override fun getUserInfo(id: Long): UserInfoResponse {
+        val user = userRepository.findById(id)
+            .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
+        return userMapper.toInfoDto(user)
+    }
+
     override fun findUserByEmailAndProvider(email: String, provider: Provider): User? {
         return userRepository.findByEmailAndProvider(email, provider).orElse(null)
     }
