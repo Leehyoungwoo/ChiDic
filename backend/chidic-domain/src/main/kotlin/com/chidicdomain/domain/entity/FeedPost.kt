@@ -1,5 +1,6 @@
 package com.chidicdomain.domain.entity
 
+import com.chidiccommon.dto.FeedPostUpdateRequest
 import jakarta.persistence.*
 
 @Entity
@@ -20,4 +21,9 @@ class FeedPost(
 
     @OneToMany(mappedBy = "feedPost", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var comments: MutableList<Comment> = mutableListOf()
-): BaseEntity()
+): BaseEntity() {
+    fun updateFeedPost(feedPostUpdateRequest: FeedPostUpdateRequest) {
+        title = feedPostUpdateRequest.title
+        content = feedPostUpdateRequest.content
+    }
+}
