@@ -4,10 +4,9 @@ import com.chidiccommon.dto.UserInfoResponse
 import com.chidiccommon.dto.UserProfileImageUpdateDto
 import com.chidiccommon.dto.UsernameUpdateDto
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
-import com.chidicdomain.domain.service.UserService
+import com.chidicdomain.domain.service.user.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import java.security.Principal
 
 @RestController
 @RequestMapping("/api/users")

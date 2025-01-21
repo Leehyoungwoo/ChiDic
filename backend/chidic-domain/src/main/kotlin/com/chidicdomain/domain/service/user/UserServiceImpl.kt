@@ -1,4 +1,4 @@
-package com.chidicdomain.domain.service
+package com.chidicdomain.domain.service.user
 
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserInfoResponse
@@ -26,7 +26,7 @@ class UserServiceImpl(
     }
 
     override fun findUserByEmailAndProvider(email: String, provider: Provider): User? {
-        return userRepository.findByEmailAndProvider(email, provider).orElse(null)
+        return userRepository.findByEmailAndProvider(email, provider)
     }
 
     @Transactional
