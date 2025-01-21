@@ -1,6 +1,6 @@
 package com.domain.service
 
-import com.chidiccommon.dto.UserProfileImageUpdateDto
+import com.chidiccommon.dto.UserProfileImageUpdateRequest
 import com.chidiccommon.enum.Provider
 import com.chidicdomain.domain.entity.User
 import com.chidiccommon.enum.Role
@@ -39,7 +39,7 @@ class UserServiceImplTest {
             provider = Provider.KAKAO
         )
 
-        var userProfileImageUpdateDto = UserProfileImageUpdateDto(
+        var userProfileImageUpdateRequest = UserProfileImageUpdateRequest(
             newImage = "새로운 이미지"
         )
 
@@ -47,10 +47,10 @@ class UserServiceImplTest {
 
         userService = UserServiceImpl(userMapper, userRepository)
 
-        userService.updateProfileImage(1, userProfileImageUpdateDto)
+        userService.updateProfileImage(1, userProfileImageUpdateRequest)
 
         verify(userRepository, times(1)).findById(1)
-        assertEquals(user.profilePicture, userProfileImageUpdateDto.newImage)
+        assertEquals(user.profilePicture, userProfileImageUpdateRequest.newImage)
     }
 
     @Test
