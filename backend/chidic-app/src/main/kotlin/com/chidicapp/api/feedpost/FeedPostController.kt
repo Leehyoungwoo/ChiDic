@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/feedposts")
+@RequestMapping("/api/feedposts")
 class FeedPostController(
     private val feedPostService: FeedPostService
 ) {

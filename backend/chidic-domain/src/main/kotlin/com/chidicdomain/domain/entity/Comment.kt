@@ -10,7 +10,7 @@ class Comment (
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feedpost_id", nullable = false)
-    var feedpost: FeedPost,
+    var feedPost: FeedPost,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -18,4 +18,4 @@ class Comment (
 
     @Column(name = "content", nullable = false, length = 255)
     var content: String
-)
+): BaseEntity()
