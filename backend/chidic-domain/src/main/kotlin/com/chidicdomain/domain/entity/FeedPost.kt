@@ -2,8 +2,10 @@ package com.chidicdomain.domain.entity
 
 import com.chidiccommon.dto.FeedPostUpdateRequest
 import jakarta.persistence.*
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
+@SQLRestriction("is_deleted = false")
 class FeedPost(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

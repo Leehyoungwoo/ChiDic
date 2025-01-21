@@ -1,6 +1,7 @@
 package com.chidicdomain.domain.service.feedpost
 
 import com.chidiccommon.dto.FeedPostCreateRequest
+import com.chidiccommon.dto.FeedPostDetailResponse
 import com.chidiccommon.dto.FeedPostUpdateRequest
 import com.chidiccommon.exception.ExceptionMessage.*
 import com.chidiccommon.exception.exceptions.FeedPostNotFoundException
@@ -16,7 +17,13 @@ class FeedPostServiceImpl(
     private val userRepository: UserRepository,
     private val feedPostRepository: FeedPostRepository,
     private val feedPostMapper: FeedPostMapper
-): FeedPostService {
+) : FeedPostService {
+    override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailResponse {
+        val feedPost = feedPostRepository.findById(feedPostId)
+            .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
+        return feedPostMapper.toFeedPostDetailResponse(feedPost)
+    }
+
     @Transactional
     override fun createFeed(userId: Long, feedPostCreateRequest: FeedPostCreateRequest) {
         val proxyUser = userRepository.getReferenceById(userId)
@@ -29,5 +36,12 @@ class FeedPostServiceImpl(
         val feedPost = feedPostRepository.findById(feedPostId)
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
         feedPost.updateFeedPost(feedPostUpdateRequest)
+    }
+
+    @Transactional
+    override fun deleteFeedPost(feedPostId: Long) {
+        val feedPost = feedPostRepository.findById(feedPostId)
+            .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
+        feedPost.deleteData()
     }
 }
