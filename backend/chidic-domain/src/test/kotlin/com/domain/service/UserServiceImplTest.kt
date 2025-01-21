@@ -4,7 +4,7 @@ import com.chidiccommon.dto.UserProfileImageUpdateRequest
 import com.chidiccommon.enum.Provider
 import com.chidicdomain.domain.entity.User
 import com.chidiccommon.enum.Role
-import com.chidicdomain.domain.mapper.UserMapper
+import com.chidicdomain.domain.mapper.user.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.domain.service.user.UserServiceImpl
 import org.junit.jupiter.api.Test

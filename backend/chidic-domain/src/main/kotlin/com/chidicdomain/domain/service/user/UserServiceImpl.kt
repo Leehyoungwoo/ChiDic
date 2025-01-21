@@ -8,7 +8,7 @@ import com.chidiccommon.enum.Provider
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.User
-import com.chidicdomain.domain.mapper.UserMapper
+import com.chidicdomain.domain.mapper.user.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
