@@ -26,7 +26,7 @@ class UserServiceImpl(
     }
 
     override fun findUserByEmailAndProvider(email: String, provider: Provider): User? {
-        return userRepository.findByEmailAndProvider(email, provider).orElse(null)
+        return userRepository.findByEmailAndProvider(email, provider)
     }
 
     @Transactional

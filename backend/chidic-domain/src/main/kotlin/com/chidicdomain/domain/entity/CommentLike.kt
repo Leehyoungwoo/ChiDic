@@ -14,7 +14,7 @@ class CommentLike(
     val id: CommentLikeId,
 
     @Column(name = "is_liked", nullable = false)
-    var isLiked: Boolean = true
+    var isLiked: Boolean = false
 ) {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id", insertable = false, updatable = false)
