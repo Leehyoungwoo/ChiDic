@@ -5,7 +5,7 @@ import com.chidiccommon.dto.TokenDto
 import com.chidiccommon.enum.Provider
 import com.chidiccore.jwt.util.JwtProvider
 import com.chidicdomain.domain.entity.User
-import com.chidicdomain.domain.service.UserService
+import com.chidicdomain.domain.service.user.UserService
 import org.springframework.stereotype.Service
 
 @Service

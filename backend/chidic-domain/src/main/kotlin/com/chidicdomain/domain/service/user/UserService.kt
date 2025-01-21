@@ -1,4 +1,4 @@
-package com.chidicdomain.domain.service
+package com.chidicdomain.domain.service.user
 
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserInfoResponse
