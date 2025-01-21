@@ -1,5 +1,5 @@
 package com.chidiccommon.dto
 
-data class UsernameUpdateDto(
+data class UsernameUpdateRequest(
     val username: String
 )

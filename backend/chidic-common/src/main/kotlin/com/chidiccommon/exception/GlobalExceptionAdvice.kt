@@ -1,5 +1,6 @@
 package com.chidiccommon.exception
 
+import com.chidiccommon.exception.exceptions.FeedPostNotFoundException
 import com.chidiccommon.exception.exceptions.RefreshTokenNotFoundException
 import com.chidiccommon.exception.exceptions.UserNotFoundException
 import org.springframework.http.HttpStatus
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class GlobalExceptionAdvice {
-    @ExceptionHandler(UserNotFoundException::class)
+    @ExceptionHandler(UserNotFoundException::class, FeedPostNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFoundException(e: RuntimeException): String? {
         return e.message

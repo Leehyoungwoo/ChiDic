@@ -1,4 +1,4 @@
-package com.chidicdomain.domain.mapper
+package com.chidicdomain.domain.mapper.user
 
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserInfoResponse

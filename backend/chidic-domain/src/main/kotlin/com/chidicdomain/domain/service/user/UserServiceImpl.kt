@@ -2,13 +2,13 @@ package com.chidicdomain.domain.service.user
 
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.dto.UserInfoResponse
-import com.chidiccommon.dto.UserProfileImageUpdateDto
-import com.chidiccommon.dto.UsernameUpdateDto
+import com.chidiccommon.dto.UserProfileImageUpdateRequest
+import com.chidiccommon.dto.UsernameUpdateRequest
 import com.chidiccommon.enum.Provider
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.User
-import com.chidicdomain.domain.mapper.UserMapper
+import com.chidicdomain.domain.mapper.user.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,17 +36,17 @@ class UserServiceImpl(
     }
 
     @Transactional
-    override fun updateProfileImage(id: Long, userProfileImageUpdateDto: UserProfileImageUpdateDto): Unit {
+    override fun updateProfileImage(id: Long, userProfileImageUpdateRequest: UserProfileImageUpdateRequest): Unit {
         val user = userRepository.findById(id)
             .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
-        user.updateProfileImage(userProfileImageUpdateDto.newImage)
+        user.updateProfileImage(userProfileImageUpdateRequest.newImage)
     }
 
     @Transactional
-    override fun updateUsername(id: Long, usernameUpdateDto: UsernameUpdateDto) {
+    override fun updateUsername(id: Long, usernameUpdateRequest: UsernameUpdateRequest) {
         val user = userRepository.findById(id)
             .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
-        user.updateUsername(usernameUpdateDto.username)
+        user.updateUsername(usernameUpdateRequest.username)
     }
 
     @Transactional
