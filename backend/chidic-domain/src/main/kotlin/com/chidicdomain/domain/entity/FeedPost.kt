@@ -3,7 +3,7 @@ package com.chidicdomain.domain.entity
 import jakarta.persistence.*
 
 @Entity
-class FeedPost (
+class FeedPost(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
@@ -16,5 +16,8 @@ class FeedPost (
     var title: String,
 
     @Column(name = "content", nullable = false, length = 1000)
-    var content: String
-)
+    var content: String,
+
+    @OneToMany(mappedBy = "feedPost", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var comments: MutableList<Comment> = mutableListOf()
+): BaseEntity()
