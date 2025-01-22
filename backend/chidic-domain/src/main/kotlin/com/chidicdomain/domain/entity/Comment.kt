@@ -1,8 +1,11 @@
 package com.chidicdomain.domain.entity
 
+import com.chidiccommon.dto.CommentRequest
 import jakarta.persistence.*
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
+@SQLRestriction("is_deleted = false")
 class Comment (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,4 +21,8 @@ class Comment (
 
     @Column(name = "content", nullable = false, length = 255)
     var content: String
-): BaseEntity()
+): BaseEntity() {
+    fun updateContent(commentRequest: CommentRequest) {
+        content = commentRequest.content
+    }
+}
