@@ -5,7 +5,8 @@ import com.chidicdomain.domain.service.commentlike.CommentLikeService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
-@RestController("/api/comment/{commentId}/likes")
+@RestController
+@RequestMapping("/api/comment/{commentId}/likes")
 class CommentLikeController(
     private val commentLikeService: CommentLikeService
 ) {
@@ -18,7 +19,7 @@ class CommentLikeController(
         commentLikeService.likeComment(userId, commentId);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping
     fun unlikeComment(
         @GetUserIdFromPrincipal userId: Long,
         @PathVariable commentId: Long

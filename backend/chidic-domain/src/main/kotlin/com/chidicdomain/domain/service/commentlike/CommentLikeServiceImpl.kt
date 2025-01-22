@@ -27,6 +27,7 @@ class CommentLikeServiceImpl(
         commentLike.likeComment()
     }
 
+    @Transactional
     override fun unlikeComment(userId: Long, commentId: Long) {
         val commentLike = commentLikeRepository.findById(CommentLikeId(userId, commentId))
 
