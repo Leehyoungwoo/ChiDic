@@ -1,22 +1,29 @@
 package com.chidicdomain.domain.entity
 
 import com.chidicdomain.domain.entity.id.FollowId
-import jakarta.persistence.EmbeddedId
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
 
 @Entity
-class Follow (
+class Follow(
     @EmbeddedId
     val id: FollowId,
 
+    @Column(name = "is_followed", nullable = false)
+    var isFollowed: Boolean = false
+) {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "follower_id", nullable = false, insertable = false, updatable = false)
-    var follower: User,
+    @JoinColumn(name = "follower_id", insertable = false, updatable = false)
+    var follower: User? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "followee_id", nullable = false, insertable = false, updatable = false)
-    var following: User,
-)
+    @JoinColumn(name = "followee_id", insertable = false, updatable = false)
+    var followee: User? = null
+
+    fun follow() {
+        isFollowed = true
+    }
+
+    fun unFollow() {
+        isFollowed = false
+    }
+}

@@ -5,8 +5,10 @@ import java.io.Serializable
 
 data class PostLikeId (
     @Column(name = "post_id")
-    var postId: Long,
+    var postId: Long?,
 
     @Column(name = "user_id")
-    var userId: Long
-) : Serializable
+    var userId: Long?
+) : Serializable {
+    constructor(): this(null, null)
+}
