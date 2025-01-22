@@ -1,5 +1,5 @@
 package com.chidiccommon.dto
 
-data class CommentCreateRequest(
+data class CommentRequest(
     val content: String
 )

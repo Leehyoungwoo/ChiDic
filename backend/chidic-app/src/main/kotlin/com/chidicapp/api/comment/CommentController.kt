@@ -1,15 +1,10 @@
 package com.chidicapp.api.comment
 
-import com.chidiccommon.dto.CommentCreateRequest
+import com.chidiccommon.dto.CommentRequest
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.comment.CommentService
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/{feedPostId}/comments")
@@ -21,8 +16,19 @@ class CommentController(
     fun createComment(
         @PathVariable feedPostId: Long,
         @GetUserIdFromPrincipal userId: Long,
-        @RequestBody commentCreateRequest: CommentCreateRequest
+        @RequestBody commentRequest: CommentRequest
     ) {
-        commentService.createComment(feedPostId, userId, commentCreateRequest)
+        commentService.createComment(feedPostId, userId, commentRequest)
+    }
+
+    // 아무나 댓글 삭제할 수 없게 인가 처리 필요
+    @PatchMapping("/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun updateComment(
+        @PathVariable commentId: Long,
+        @GetUserIdFromPrincipal userId: Long,
+        @RequestBody commentRequest: CommentRequest
+    ) {
+        commentService.updateComment(commentId, commentRequest)
     }
 }

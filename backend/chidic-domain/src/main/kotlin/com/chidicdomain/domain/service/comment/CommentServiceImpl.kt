@@ -1,6 +1,9 @@
 package com.chidicdomain.domain.service.comment
 
-import com.chidiccommon.dto.CommentCreateRequest
+import com.chidiccommon.dto.CommentRequest
+import com.chidiccommon.exception.ExceptionMessage
+import com.chidiccommon.exception.ExceptionMessage.*
+import com.chidiccommon.exception.exceptions.CommentNotFoundException
 import com.chidicdomain.domain.mapper.comment.CommentMapper
 import com.chidicdomain.domain.repository.CommentRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
@@ -17,11 +20,18 @@ class CommentServiceImpl(
     private val commentMapper: CommentMapper
 ): CommentService {
     @Transactional
-    override fun createComment(feedPostId: Long, userId: Long, commentCreateRequest: CommentCreateRequest) {
+    override fun createComment(feedPostId: Long, userId: Long, commentRequest: CommentRequest) {
         val user = userRepository.getReferenceById(userId)
         val feedPost = feedPostRepository.getReferenceById(feedPostId)
 
-        val newComment = commentMapper.toEntity(user, feedPost, commentCreateRequest)
+        val newComment = commentMapper.toEntity(user, feedPost, commentRequest)
         commentRepository.save(newComment)
+    }
+
+    @Transactional
+    override fun updateComment(commentId: Long, commentRequest: CommentRequest) {
+        val comment = commentRepository.findById(commentId)
+            .orElseThrow { CommentNotFoundException(COMMENT_NOT_FOUND.message) }
+        comment.updateContent(commentRequest)
     }
 }
