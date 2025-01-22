@@ -9,6 +9,6 @@ data class FollowId (
     @Column(name = "follower_id")
     val followerId: Long,
 
-    @Column(name = "following_id")
+    @Column(name = "followee_id")
     val followeeId: Long
 ) : Serializable
