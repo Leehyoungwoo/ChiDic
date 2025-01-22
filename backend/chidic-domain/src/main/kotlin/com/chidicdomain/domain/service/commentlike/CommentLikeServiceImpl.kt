@@ -36,12 +36,14 @@ class CommentLikeServiceImpl(
     private fun findOrCreateCommentLike(commentLikeId: CommentLikeId, user: User, comment: Comment): CommentLike {
         return commentLikeRepository.findById(commentLikeId)
             .orElseGet {
-                CommentLike(
-                    id = commentLikeId
-                ).apply {
-                    this.user = user
-                    this.comment = comment
-                }
+                commentLikeRepository.save(
+                    CommentLike(
+                        id = commentLikeId
+                    ).apply {
+                        this.user = user
+                        this.comment = comment
+                    }
+                )
             }
     }
 }
