@@ -31,4 +31,14 @@ class CommentController(
     ) {
         commentService.updateComment(commentId, commentRequest)
     }
+
+    // 작성인만 삭제할 수 있게 인가처리 필요
+    @DeleteMapping("/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun deleteComment(
+        @PathVariable commentId: Long,
+        @GetUserIdFromPrincipal userId: Long
+    ) {
+        commentService.deleteComment(commentId)
+    }
 }

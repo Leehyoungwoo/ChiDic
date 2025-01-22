@@ -1,7 +1,6 @@
 package com.chidicdomain.domain.service.comment
 
 import com.chidiccommon.dto.CommentRequest
-import com.chidiccommon.exception.ExceptionMessage
 import com.chidiccommon.exception.ExceptionMessage.*
 import com.chidiccommon.exception.exceptions.CommentNotFoundException
 import com.chidicdomain.domain.mapper.comment.CommentMapper
@@ -18,7 +17,7 @@ class CommentServiceImpl(
     private val userRepository: UserRepository,
     private val feedPostRepository: FeedPostRepository,
     private val commentMapper: CommentMapper
-): CommentService {
+) : CommentService {
     @Transactional
     override fun createComment(feedPostId: Long, userId: Long, commentRequest: CommentRequest) {
         val user = userRepository.getReferenceById(userId)
@@ -33,5 +32,12 @@ class CommentServiceImpl(
         val comment = commentRepository.findById(commentId)
             .orElseThrow { CommentNotFoundException(COMMENT_NOT_FOUND.message) }
         comment.updateContent(commentRequest)
+    }
+
+    @Transactional
+    override fun deleteComment(commentId: Long) {
+        val comment = commentRepository.findById(commentId)
+            .orElseThrow { CommentNotFoundException(COMMENT_NOT_FOUND.message) }
+        comment.deleteData()
     }
 }
