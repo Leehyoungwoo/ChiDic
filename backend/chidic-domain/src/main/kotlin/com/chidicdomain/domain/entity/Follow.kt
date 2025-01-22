@@ -22,4 +22,8 @@ class Follow(
     fun follow() {
         isFollowed = true
     }
+
+    fun unFollow() {
+        isFollowed = false
+    }
 }
