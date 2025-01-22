@@ -1,5 +1,6 @@
 package com.chidicdomain.domain.service.feedpostlike
 
+import com.chidiccommon.dto.FeedLikeResponse
 import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.domain.entity.FeedPostLIke
 import com.chidicdomain.domain.entity.User
@@ -18,6 +19,14 @@ class FeedPostLikeServiceImpl(
     private val feedPostLikeRepository: FeedPostLikeRepository
 ) : FeedPostLikeService {
 
+    override fun getLikeCount(feedPostId: Long): FeedLikeResponse {
+        val feedPost = feedPostRepository.getReferenceById(feedPostId)
+        val postLikes = feedPostLikeRepository.findByFeedPost(feedPost)
+        return FeedLikeResponse(
+            postId = feedPostId,
+            likeCount = postLikes.size.toLong()
+        )
+    }
     @Transactional
     override fun likeFeedPost(userId: Long, feedPostId: Long) {
         val proxyUser = userRepository.getReferenceById(userId)
@@ -27,6 +36,13 @@ class FeedPostLikeServiceImpl(
         val feedPostLike = findOrCreateFeedPostLike(PostLikeId(feedPostId, userId), proxyUser, proxyFeedPost)
 
         feedPostLike.likePost()
+    }
+
+    @Transactional
+    override fun unlikeFeedPost(userId: Long, feedPostId: Long) {
+        val feedPostLike = feedPostLikeRepository.findById(PostLikeId(feedPostId, userId))
+
+        feedPostLike.get().unlikePost()
     }
 
     private fun findOrCreateFeedPostLike(
