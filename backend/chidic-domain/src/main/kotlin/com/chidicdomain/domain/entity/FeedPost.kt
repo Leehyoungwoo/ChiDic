@@ -1,6 +1,7 @@
 package com.chidicdomain.domain.entity
 
 import com.chidiccommon.dto.FeedPostUpdateRequest
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
 
@@ -13,6 +14,7 @@ class FeedPost(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties("hibernateLazyInitializer", "handler") // 이 부분 추가
     var user: User,
 
     @Column(name = "title", nullable = false, length = 50)

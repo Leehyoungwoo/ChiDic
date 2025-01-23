@@ -28,8 +28,9 @@ class FeedPostController(
     fun getNewsFeed(
         @RequestParam(required = false) lastFeedPostId: Long?,
         @RequestParam(required = false, defaultValue = "20") size: Int,
+        @RequestParam(required = false, defaultValue = "0") start: Long,
         @GetUserIdFromPrincipal userId: Long): List<FeedPostListResponse> {
-        return feedPostService.getFollowedUsersFeed(userId, lastFeedPostId, size)
+        return feedPostService.getFollowedUsersFeed(userId, lastFeedPostId, size, start)
     }
 
     @GetMapping("/{feedPostId}")
