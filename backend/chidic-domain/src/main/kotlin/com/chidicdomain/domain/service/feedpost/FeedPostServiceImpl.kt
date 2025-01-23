@@ -7,6 +7,7 @@ import com.chidiccommon.dto.FeedPostUpdateRequest
 import com.chidiccommon.exception.ExceptionMessage.*
 import com.chidiccommon.exception.exceptions.FeedPostNotFoundException
 import com.chidicdomain.domain.mapper.feedpost.FeedPostMapper
+import com.chidicdomain.domain.repository.FeedPostLikeRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
@@ -22,7 +23,8 @@ class FeedPostServiceImpl(
     private val userRepository: UserRepository,
     private val feedPostRepository: FeedPostRepository,
     private val feedPostMapper: FeedPostMapper,
-    private val followRepository: FollowRepository
+    private val followRepository: FollowRepository,
+    private val feedPostLikeRepository: FeedPostLikeRepository
 ) : FeedPostService {
     override fun getFollowedUsersFeed(userId: Long, page: Int, size: Int): List<FeedPostListResponse> {
         val user = userRepository.getReferenceById(userId)
@@ -40,7 +42,7 @@ class FeedPostServiceImpl(
                 content = feedPost.content,
                 writer = feedPost.user.username,
                 writerProfile = feedPost.user.profilePicture,
-                likeCount = 0L,
+                likeCount = feedPostLikeRepository.countByFeedPost(feedPost),
                 commentCont = feedPost.comments.size.toLong(),
                 createdAt = feedPost.createdAt
             )

@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface FeedPostLikeRepository: JpaRepository<FeedPostLIke, PostLikeId> {
     fun findByFeedPost(feedPost: FeedPost): List<FeedPostLIke>
+    fun countByFeedPost(feedPost: FeedPost): Long
 }
