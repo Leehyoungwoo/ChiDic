@@ -16,8 +16,7 @@ class AuthService(
 ) {
     fun loginOrRegister(kakaoAccessToken: String): TokenDto {
         val kakaoUser = kakaoOAuth2Service.getUserInfo(kakaoAccessToken)
-
-        val user = userService.findUserByEmailAndProvider(kakaoUser.username, Provider.KAKAO) ?: registerUser(kakaoUser)
+        val user = userService.findUserByEmailAndProvider(kakaoUser.email, Provider.KAKAO) ?: registerUser(kakaoUser)
 
         val authentication = jwtProvider.getOAuth2Authentication(user)
 
@@ -40,5 +39,10 @@ class AuthService(
         val newRefreshToken = jwtProvider.createRefreshToken(authentication)
 
         return TokenDto(accessToken, newRefreshToken)
+    }
+
+    fun makeTestAccessToken(userId: Long): String {
+        val user = userService.getUser(userId)
+        return jwtProvider.createTokenFromUser(user, 1800000000)
     }
 }
