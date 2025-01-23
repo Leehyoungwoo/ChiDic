@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface FeedPostRepository : JpaRepository<FeedPost, Long>{
-    fun findByUserIn(userList: List<User>, pageable: Pageable): Page<FeedPost>
+    fun findByUserIn(userList: List<User>, pageable: Pageable): List<FeedPost>
+    fun findByUserInAndIdLessThan(userList: List<User>, lastFeedPostId: Long, pageable: Pageable): List<FeedPost>
 }

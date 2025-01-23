@@ -26,14 +26,22 @@ class FeedPostServiceImpl(
     private val followRepository: FollowRepository,
     private val feedPostLikeRepository: FeedPostLikeRepository
 ) : FeedPostService {
-    override fun getFollowedUsersFeed(userId: Long, page: Int, size: Int): List<FeedPostListResponse> {
+    override fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int): List<FeedPostListResponse> {
         val user = userRepository.getReferenceById(userId)
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+        val pageable = if (lastFeedPostId == null) {
+            PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
+        } else {
+            PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
+        }
 
         val followList = followRepository.findAllByFollower(user)
         val userList = followList.map { it.followee!! }
 
-        val feedPosts = feedPostRepository.findByUserIn(userList, pageable)
+        val feedPosts = if (lastFeedPostId == null) {
+            feedPostRepository.findByUserIn(userList, pageable)
+        } else {
+            feedPostRepository.findByUserInAndIdLessThan(userList, lastFeedPostId, pageable)
+        }
 
         return feedPosts.map { feedPost ->
             FeedPostListResponse(
