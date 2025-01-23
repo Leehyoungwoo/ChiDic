@@ -2,6 +2,7 @@ package com.chidicapp.api.feedpost
 
 import com.chidiccommon.dto.FeedPostCreateRequest
 import com.chidiccommon.dto.FeedPostDetailResponse
+import com.chidiccommon.dto.FeedPostListResponse
 import com.chidiccommon.dto.FeedPostUpdateRequest
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.feedpost.FeedPostService
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -21,6 +23,15 @@ import org.springframework.web.bind.annotation.RestController
 class FeedPostController(
     private val feedPostService: FeedPostService
 ) {
+    @GetMapping("/newsfeed")
+    @ResponseStatus(HttpStatus.OK)
+    fun getNewsFeed(
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "20") size: Int,
+        @GetUserIdFromPrincipal userId: Long): List<FeedPostListResponse> {
+        return feedPostService.getFollowedUsersFeed(userId, page, size)
+    }
+
     @GetMapping("/{feedPostId}")
     @ResponseStatus(HttpStatus.OK)
     fun readFeedPostDetail(

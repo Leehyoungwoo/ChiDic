@@ -2,9 +2,12 @@ package com.chidicdomain.domain.service.feedpost
 
 import com.chidiccommon.dto.FeedPostCreateRequest
 import com.chidiccommon.dto.FeedPostDetailResponse
+import com.chidiccommon.dto.FeedPostListResponse
 import com.chidiccommon.dto.FeedPostUpdateRequest
+import org.springframework.data.domain.Page
 
 interface FeedPostService {
+    fun getFollowedUsersFeed(userId: Long, page: Int, size: Int): List<FeedPostListResponse>
     fun getFeedPostDetail(feedPostId: Long): FeedPostDetailResponse
     fun createFeed(userId: Long, feedPostCreateRequest: FeedPostCreateRequest)
     fun updateFeed(feedPostId: Long, feedPostUpdateRequest: FeedPostUpdateRequest)
