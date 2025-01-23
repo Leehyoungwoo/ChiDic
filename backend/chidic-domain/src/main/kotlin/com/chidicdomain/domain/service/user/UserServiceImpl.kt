@@ -55,4 +55,9 @@ class UserServiceImpl(
             .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
         user.deleteData()
     }
+
+    override fun getUser(id: Long): User {
+        return userRepository.findById(id)
+            .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
+    }
 }
