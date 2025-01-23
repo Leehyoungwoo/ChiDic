@@ -26,8 +26,10 @@ class OAuth2Controller(
 
     @PostMapping("/refresh")
     @ResponseStatus(HttpStatus.OK)
-    fun refreshToken(@CookieValue("refresh_token") refreshToken: String,
-                     response: HttpServletResponse): TokenResponse {
+    fun refreshToken(
+        @CookieValue("refresh_token") refreshToken: String,
+        response: HttpServletResponse
+    ): TokenResponse {
         val tokenDto = authService.refreshAccessToken(refreshToken)
 
         CookieUtils.addRefreshTokenCookie(response, tokenDto.refreshToken)
@@ -41,5 +43,13 @@ class OAuth2Controller(
     @ResponseStatus(HttpStatus.OK)
     fun logout(response: HttpServletResponse) {
         CookieUtils.deleteRefreshTokenCookie(response)
+    }
+
+    @PostMapping("/make-access-token/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun makeAccessToken(
+        @PathVariable("userId") userId: Long
+    ): String {
+        return authService.makeTestAccessToken(userId)
     }
 }

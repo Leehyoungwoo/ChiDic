@@ -97,6 +97,20 @@ class JwtProvider(
         return request.getHeader(jwtHeaderKey)?.takeIf { it.startsWith(BEARER_PREFIX) }?.removePrefix(BEARER_PREFIX)
     }
 
+    fun createTokenFromUser(
+        user: User,
+        tokenValidityInMilliseconds: Long
+    ): String {
+        return Jwts.builder()
+            .claim("id", user.id)
+            .claim("username", user.username)
+            .claim("role", user.role.toString())
+            .signWith(key)
+            .setExpiration(Date(System.currentTimeMillis() + tokenValidityInMilliseconds))
+            .compact()
+    }
+
+
     private fun createToken(
         authentication: Authentication,
         tokenValidityInMilliseconds: Long
