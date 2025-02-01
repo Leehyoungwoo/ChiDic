@@ -4,12 +4,13 @@ import com.chidicapp.api.request.FeedPostCreateRequest
 import com.chidicapp.api.request.FeedPostUpdateRequest
 import com.chidicapp.api.response.FeedPostDetailResponse
 import com.chidicapp.api.response.FeedPostListResponse
-import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidicdomain.domain.service.feedpost.FeedPostService
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
 import com.chidicdomain.dto.FeedPostUpdateDto
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,7 +24,9 @@ class FeedPostController(
         @RequestParam(required = false) lastFeedPostId: Long?,
         @RequestParam(required = false, defaultValue = "20") size: Int,
         @RequestParam(required = false, defaultValue = "0") start: Long,
-        @GetUserIdFromPrincipal userId: Long): FeedPostListResponse {
+        @AuthenticationPrincipal principal: OAuth2UserDetails
+    ): FeedPostListResponse {
+        val userId = principal.getId()
         val followedUsersFeedList = feedPostService.getFollowedUsersFeed(userId, lastFeedPostId, size, start)
         return FeedPostListResponse(
             feePosts = followedUsersFeedList
@@ -42,8 +45,10 @@ class FeedPostController(
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     fun createFeed(
-        @GetUserIdFromPrincipal userId: Long, @RequestBody feedPostCreateRequest: FeedPostCreateRequest
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
+        @RequestBody feedPostCreateRequest: FeedPostCreateRequest
     ) {
+        val userId = principal.getId()
         val feedPostCreateDto = FeedPostMapper.requestToFeedCreateDto(userId, feedPostCreateRequest)
         feedPostService.createFeed(feedPostCreateDto)
     }
@@ -52,7 +57,7 @@ class FeedPostController(
     @ResponseStatus(HttpStatus.OK)
     // 아무나 고칠 수 없게 preAuthorized추가
     fun updateFeed(
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @PathVariable feedPostId: Long,
         @RequestBody feedPostUpdateRequest: FeedPostUpdateRequest
     ) {
@@ -64,14 +69,14 @@ class FeedPostController(
     @ResponseStatus(HttpStatus.OK)
     // 아무나 삭제할 수 없게 인가 처리
     fun deleteFeed(
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @PathVariable feedPostId: Long
     ) {
         feedPostService.deleteFeedPost(feedPostId)
     }
 }
 
-object FeedPostMapper{
+object FeedPostMapper {
     fun dtoToFeedPostDetailResponse(feedPostDetailDto: FeedPostDetailDto): FeedPostDetailResponse {
         return FeedPostDetailResponse(
             title = feedPostDetailDto.title,

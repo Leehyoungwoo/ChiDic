@@ -1,10 +1,11 @@
 package com.chidicapp.api.feedpostlike
 
 import com.chidicapp.api.response.FeedLikeResponse
-import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidicdomain.domain.service.feedpostlike.FeedPostLikeService
 import com.chidicdomain.dto.FeedLikeDto
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -24,9 +25,10 @@ class FeedPostLikeController(
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     fun likeFeedPost(
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @PathVariable feedPostId: Long
     ) {
+        val userId = principal.getId()
         feedPostLikeService.likeFeedPost(userId, feedPostId)
     }
 
@@ -34,9 +36,10 @@ class FeedPostLikeController(
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
     fun unlikeFeedPost(
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @PathVariable feedPostId: Long
     ) {
+        val userId = principal.getId()
         feedPostLikeService.unlikeFeedPost(userId, feedPostId)
     }
 }
