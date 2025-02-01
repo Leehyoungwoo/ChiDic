@@ -1,9 +1,10 @@
 package com.chidicdomain.domain.service.comment
 
-import com.chidiccommon.dto.CommentRequest
+import com.chidicapp.api.request.CommentRequest
+import com.chidicdomain.dto.CommentCreateDto
 
 interface CommentService {
-    fun createComment(feedPostId: Long, userId: Long, commentRequest: CommentRequest)
+    fun createComment(commentCreateDto: CommentCreateDto)
     fun updateComment(commentId: Long, commentRequest: CommentRequest)
     fun deleteComment(commentId: Long)
 }

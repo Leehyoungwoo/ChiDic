@@ -1,8 +1,9 @@
 package com.chidicapp.api.comment
 
-import com.chidiccommon.dto.CommentRequest
+import com.chidicapp.api.request.CommentRequest
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.comment.CommentService
+import com.chidicdomain.dto.CommentCreateDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -18,7 +19,7 @@ class CommentController(
         @GetUserIdFromPrincipal userId: Long,
         @RequestBody commentRequest: CommentRequest
     ) {
-        commentService.createComment(feedPostId, userId, commentRequest)
+        commentService.createComment(CommentRequestMapper.requestToCommentCreateDto(userId, feedPostId, commentRequest))
     }
 
     // 아무나 댓글 삭제할 수 없게 인가 처리 필요
@@ -40,5 +41,15 @@ class CommentController(
         @GetUserIdFromPrincipal userId: Long
     ) {
         commentService.deleteComment(commentId)
+    }
+}
+
+object CommentRequestMapper {
+    fun requestToCommentCreateDto(userId: Long, feedPostId: Long, commentRequest: CommentRequest): CommentCreateDto {
+        return CommentCreateDto(
+            userId = userId,
+            feedPostId = feedPostId,
+            content = commentRequest.content
+        )
     }
 }

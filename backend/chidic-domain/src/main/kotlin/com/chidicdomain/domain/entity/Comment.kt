@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.chidiccommon.dto.CommentRequest
+import com.chidicapp.api.request.CommentRequest
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
 
