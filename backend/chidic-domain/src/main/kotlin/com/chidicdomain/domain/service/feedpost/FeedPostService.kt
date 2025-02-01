@@ -12,3 +12,5 @@ interface FeedPostService {
     fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto)
     fun deleteFeedPost(feedPostId: Long)
 }
+
+class FeedPostNotFoundException(message: String) : RuntimeException(message)

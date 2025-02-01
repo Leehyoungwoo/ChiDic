@@ -3,7 +3,6 @@ package com.chidicdomain.domain.service.user
 import com.chidiccommon.dto.OAuth2UserInfo
 import com.chidiccommon.enum.Provider
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
-import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.mapper.user.UserMapper
 import com.chidicdomain.domain.repository.UserRepository

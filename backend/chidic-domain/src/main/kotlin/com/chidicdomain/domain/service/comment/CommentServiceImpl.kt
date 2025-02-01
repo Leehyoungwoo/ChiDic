@@ -1,7 +1,6 @@
 package com.chidicdomain.domain.service.comment
 
 import com.chidiccommon.exception.ExceptionMessage.COMMENT_NOT_FOUND
-import com.chidiccommon.exception.exceptions.CommentNotFoundException
 import com.chidicdomain.domain.entity.Comment
 import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.domain.entity.User

@@ -8,3 +8,5 @@ interface CommentService {
     fun updateComment(commentUpdateDto: CommentUpdateDto)
     fun deleteComment(commentId: Long)
 }
+
+class CommentNotFoundException(message: String) : RuntimeException(message)

@@ -1,9 +1,9 @@
-package com.chidiccommon.exception
+package com.chidicapp.exception
 
-import com.chidiccommon.exception.exceptions.CommentNotFoundException
-import com.chidiccommon.exception.exceptions.FeedPostNotFoundException
-import com.chidiccommon.exception.exceptions.RefreshTokenNotFoundException
-import com.chidiccommon.exception.exceptions.UserNotFoundException
+import com.chidiccore.jwt.filter.RefreshTokenNotFoundException
+import com.chidicdomain.domain.service.comment.CommentNotFoundException
+import com.chidicdomain.domain.service.feedpost.FeedPostNotFoundException
+import com.chidicdomain.domain.service.user.UserNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus

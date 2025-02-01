@@ -1,12 +1,12 @@
 package com.chidicdomain.domain.service.follow
 
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
-import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.Follow
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.entity.id.FollowId
 import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
+import com.chidicdomain.domain.service.user.UserNotFoundException
 import com.chidicdomain.dto.FollowCountDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

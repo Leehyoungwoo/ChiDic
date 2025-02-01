@@ -2,14 +2,13 @@ package com.chidicdomain.domain.service.feedpost
 
 import com.chidiccommon.exception.ExceptionMessage.FEED_POST_NOT_FOUND
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
-import com.chidiccommon.exception.exceptions.FeedPostNotFoundException
-import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.domain.mapper.feedpost.FeedPostMapper
 import com.chidicdomain.domain.repository.FeedPostLikeRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
+import com.chidicdomain.domain.service.user.UserNotFoundException
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
 import com.chidicdomain.dto.FeedPostListDto

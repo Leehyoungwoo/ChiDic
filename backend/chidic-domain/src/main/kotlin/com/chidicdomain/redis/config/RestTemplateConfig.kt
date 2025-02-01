@@ -1,4 +1,4 @@
-package com.chidiccommon.config
+package com.chidicdomain.redis.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

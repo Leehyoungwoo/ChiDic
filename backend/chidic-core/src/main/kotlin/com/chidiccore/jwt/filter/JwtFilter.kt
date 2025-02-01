@@ -1,7 +1,6 @@
 package com.chidiccore.jwt.filter
 
 import com.chidiccommon.exception.ExceptionMessage.REFRESH_TOKEN_NOT_FOUND
-import com.chidiccommon.exception.exceptions.RefreshTokenNotFoundException
 import com.chidiccore.jwt.util.JwtProvider
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -61,3 +60,5 @@ class JwtFilter(
         return request.cookies?.firstOrNull { it.name == "refresh_token" }?.value
     }
 }
+
+class RefreshTokenNotFoundException(message: String) : RuntimeException(message)
