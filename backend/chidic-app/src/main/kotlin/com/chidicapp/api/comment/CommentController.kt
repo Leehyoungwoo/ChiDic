@@ -1,7 +1,7 @@
 package com.chidicapp.api.comment
 
 import com.chidicapp.api.request.CommentRequest
-import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.comment.CommentService
 import com.chidicdomain.dto.CommentCreateDto
 import com.chidicdomain.dto.CommentUpdateDto

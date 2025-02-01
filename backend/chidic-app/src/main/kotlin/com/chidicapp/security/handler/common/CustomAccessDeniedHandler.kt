@@ -1,4 +1,4 @@
-package com.chidiccore.handler.common
+package com.chidicapp.security.handler.common
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

@@ -1,6 +1,6 @@
-package com.chidiccore.jwt.util
+package com.chidicapp.security.jwt.util
 
-import com.chidiccore.auth.model.OAuth2UserDetails
+import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidiccommon.enum.Role
 import com.chidicdomain.domain.entity.User
 import io.jsonwebtoken.Claims
@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.stream.Collectors
 import javax.crypto.SecretKey

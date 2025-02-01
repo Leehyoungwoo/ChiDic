@@ -1,6 +1,6 @@
 package com.chidicapp.exception
 
-import com.chidiccore.jwt.filter.RefreshTokenNotFoundException
+import com.chidicapp.security.jwt.filter.RefreshTokenNotFoundException
 import com.chidicdomain.domain.service.comment.CommentNotFoundException
 import com.chidicdomain.domain.service.feedpost.FeedPostNotFoundException
 import com.chidicdomain.domain.service.user.UserNotFoundException

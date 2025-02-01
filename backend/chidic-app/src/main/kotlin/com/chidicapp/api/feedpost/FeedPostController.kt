@@ -4,11 +4,10 @@ import com.chidicapp.api.request.FeedPostCreateRequest
 import com.chidicapp.api.request.FeedPostUpdateRequest
 import com.chidicapp.api.response.FeedPostDetailResponse
 import com.chidicapp.api.response.FeedPostListResponse
-import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.feedpost.FeedPostService
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
-import com.chidicdomain.dto.FeedPostListDto
 import com.chidicdomain.dto.FeedPostUpdateDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*

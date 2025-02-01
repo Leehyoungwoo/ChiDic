@@ -1,4 +1,4 @@
-package com.chidiccore.auth.annotatiton
+package com.chidicapp.security.auth.annotatiton
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 

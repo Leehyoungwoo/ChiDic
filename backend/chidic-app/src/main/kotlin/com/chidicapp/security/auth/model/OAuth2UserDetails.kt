@@ -1,4 +1,4 @@
-package com.chidiccore.auth.model
+package com.chidicapp.security.auth.model
 
 import com.chidiccommon.enum.Role
 import org.springframework.security.core.GrantedAuthority

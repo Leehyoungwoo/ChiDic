@@ -1,7 +1,7 @@
-package com.chidiccore.auth.resolver
+package com.chidicapp.security.auth.resolver
 
-import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
-import com.chidiccore.auth.model.OAuth2UserDetails
+import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.model.OAuth2UserDetails
 import org.springframework.core.MethodParameter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component

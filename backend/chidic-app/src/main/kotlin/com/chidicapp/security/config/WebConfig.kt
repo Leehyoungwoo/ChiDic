@@ -1,6 +1,6 @@
-package com.chidiccore.config
+package com.chidicapp.security.config
 
-import com.chidiccore.auth.resolver.GetUserIdArgumentResolver
+import com.chidicapp.security.auth.resolver.GetUserIdArgumentResolver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.support.HandlerMethodArgumentResolver

@@ -1,4 +1,4 @@
-package com.chidiccore.handler.entrypoint
+package com.chidicapp.security.handler.entrypoint
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

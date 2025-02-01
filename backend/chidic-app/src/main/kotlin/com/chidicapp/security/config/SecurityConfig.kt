@@ -1,9 +1,9 @@
-package com.chidiccore.config
+package com.chidicapp.security.config
 
-import com.chidiccore.handler.common.CustomAccessDeniedHandler
-import com.chidiccore.handler.entrypoint.CustomAuthenticationEntryPoint
-import com.chidiccore.jwt.filter.JwtFilter
-import com.chidiccore.jwt.util.JwtProvider
+import com.chidicapp.security.handler.common.CustomAccessDeniedHandler
+import com.chidicapp.security.handler.entrypoint.CustomAuthenticationEntryPoint
+import com.chidicapp.security.jwt.filter.JwtFilter
+import com.chidicapp.security.jwt.util.JwtProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod

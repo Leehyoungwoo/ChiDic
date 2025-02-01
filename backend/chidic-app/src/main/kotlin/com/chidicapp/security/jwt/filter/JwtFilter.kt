@@ -1,7 +1,7 @@
-package com.chidiccore.jwt.filter
+package com.chidicapp.security.jwt.filter
 
 import com.chidiccommon.exception.ExceptionMessage.REFRESH_TOKEN_NOT_FOUND
-import com.chidiccore.jwt.util.JwtProvider
+import com.chidicapp.security.jwt.util.JwtProvider
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

@@ -1,7 +1,7 @@
 package com.chidicapp.api.feedpostlike
 
 import com.chidicapp.api.response.FeedLikeResponse
-import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.feedpostlike.FeedPostLikeService
 import com.chidicdomain.dto.FeedLikeDto
 import org.springframework.http.HttpStatus

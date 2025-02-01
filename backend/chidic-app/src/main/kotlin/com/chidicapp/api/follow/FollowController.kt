@@ -1,7 +1,7 @@
 package com.chidicapp.api.follow
 
 import com.chidicapp.api.response.FollowCountResponse
-import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.follow.FollowService
 import com.chidicdomain.dto.FollowCountDto
 import org.springframework.http.HttpStatus
