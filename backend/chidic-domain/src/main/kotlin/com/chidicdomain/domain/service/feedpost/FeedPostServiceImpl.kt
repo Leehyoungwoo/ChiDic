@@ -1,10 +1,10 @@
 package com.chidicdomain.domain.service.feedpost
 
 import com.chidiccommon.dto.FeedPostCreateRequest
-import com.chidiccommon.dto.FeedPostDetailResponse
 import com.chidiccommon.dto.FeedPostListResponse
 import com.chidiccommon.dto.FeedPostUpdateRequest
-import com.chidiccommon.exception.ExceptionMessage.*
+import com.chidiccommon.exception.ExceptionMessage.FEED_POST_NOT_FOUND
+import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidiccommon.exception.exceptions.FeedPostNotFoundException
 import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.FeedPost
@@ -13,8 +13,10 @@ import com.chidicdomain.domain.repository.FeedPostLikeRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
+import com.chidicdomain.dto.FeedPostCreateDto
+import com.chidicdomain.dto.FeedPostDetailDto
+import com.chidicdomain.dto.FeedPostUpdateDto
 import com.chidicdomain.redis.service.RedisService
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -83,29 +85,29 @@ class FeedPostServiceImpl(
         }
     }
 
-    override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailResponse {
+    override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
         val feedPost = feedPostRepository.findById(feedPostId)
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
-        return feedPostMapper.toFeedPostDetailResponse(feedPost)
+        return feedPostMapper.toFeedPostDetailDto(feedPost)
     }
 
     @Transactional
-    override fun createFeed(userId: Long, feedPostCreateRequest: FeedPostCreateRequest) {
-        val proxyUser = userRepository.findById(userId)
+    override fun createFeed(feedPostCreateDto: FeedPostCreateDto) {
+        val proxyUser = userRepository.findById(feedPostCreateDto.userId)
             .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
 
-        val newFeedPost = feedPostMapper.toEntity(proxyUser, feedPostCreateRequest)
+        val newFeedPost = feedPostMapper.toEntity(proxyUser, feedPostCreateDto)
 
         val feedPost = feedPostRepository.save(newFeedPost)
 
-        redisService.saveFeedPost(userId, feedPost)
+        redisService.saveFeedPost(feedPostCreateDto.userId, feedPost)
     }
 
     @Transactional
-    override fun updateFeed(feedPostId: Long, feedPostUpdateRequest: FeedPostUpdateRequest) {
-        val feedPost = feedPostRepository.findById(feedPostId)
+    override fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto) {
+        val feedPost = feedPostRepository.findById(feedPostUpdateDto.feedPostId)
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
-        feedPost.updateFeedPost(feedPostUpdateRequest)
+        feedPost.updateFeedPost(feedPostUpdateDto)
     }
 
     @Transactional

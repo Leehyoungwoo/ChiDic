@@ -1,11 +1,15 @@
 package com.chidicapp.api.feedpost
 
+import com.chidicapp.api.feedpostlike.FeedPostLikeMapper
 import com.chidiccommon.dto.FeedPostCreateRequest
-import com.chidiccommon.dto.FeedPostDetailResponse
+import com.chidicapp.api.response.FeedPostDetailResponse
 import com.chidiccommon.dto.FeedPostListResponse
 import com.chidiccommon.dto.FeedPostUpdateRequest
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.feedpost.FeedPostService
+import com.chidicdomain.dto.FeedPostCreateDto
+import com.chidicdomain.dto.FeedPostDetailDto
+import com.chidicdomain.dto.FeedPostUpdateDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -38,7 +42,8 @@ class FeedPostController(
     fun readFeedPostDetail(
         @PathVariable feedPostId: Long
     ): FeedPostDetailResponse {
-        return feedPostService.getFeedPostDetail(feedPostId)
+        val feedPostDetailDto = feedPostService.getFeedPostDetail(feedPostId)
+        return FeedPostMapper.dtoToFeedPostDetailResponse(feedPostDetailDto)
     }
 
     @PostMapping
@@ -46,7 +51,8 @@ class FeedPostController(
     fun createFeed(
         @GetUserIdFromPrincipal userId: Long, @RequestBody feedPostCreateRequest: FeedPostCreateRequest
     ) {
-        feedPostService.createFeed(userId, feedPostCreateRequest)
+        val feedPostCreateDto = FeedPostMapper.requestToFeedCreateDto(userId, feedPostCreateRequest)
+        feedPostService.createFeed(feedPostCreateDto)
     }
 
     @PatchMapping("/{feedPostId}")
@@ -57,7 +63,8 @@ class FeedPostController(
         @PathVariable feedPostId: Long,
         @RequestBody feedPostUpdateRequest: FeedPostUpdateRequest
     ) {
-        feedPostService.updateFeed(feedPostId, feedPostUpdateRequest)
+        val feedPostUpdateDto = FeedPostMapper.requestToFeedPostUpdateDto(feedPostId, feedPostUpdateRequest)
+        feedPostService.updateFeed(feedPostUpdateDto)
     }
 
     @DeleteMapping("/{feedPostId}")
@@ -68,5 +75,32 @@ class FeedPostController(
         @PathVariable feedPostId: Long
     ) {
         feedPostService.deleteFeedPost(feedPostId)
+    }
+}
+
+object FeedPostMapper{
+    fun dtoToFeedPostDetailResponse(feedPostDetailDto: FeedPostDetailDto): FeedPostDetailResponse {
+        return FeedPostDetailResponse(
+            title = feedPostDetailDto.title,
+            content = feedPostDetailDto.content,
+            comments = feedPostDetailDto.comments,
+            created = feedPostDetailDto.created
+        )
+    }
+
+    fun requestToFeedCreateDto(userid: Long, feedPostCreateRequest: FeedPostCreateRequest): FeedPostCreateDto {
+        return FeedPostCreateDto(
+            userId = userid,
+            title = feedPostCreateRequest.title,
+            content = feedPostCreateRequest.content,
+        )
+    }
+
+    fun requestToFeedPostUpdateDto(feedPostId: Long, feedPostUpdateRequest: FeedPostUpdateRequest): FeedPostUpdateDto {
+        return FeedPostUpdateDto(
+            feedPostId = feedPostId,
+            title = feedPostUpdateRequest.title,
+            content = feedPostUpdateRequest.content,
+        )
     }
 }
