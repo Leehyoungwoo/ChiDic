@@ -1,8 +1,8 @@
-package com.chidiccommon.dto
+package com.chidicdomain.dto
 
 import java.time.LocalDateTime
 
-data class FeedPostListResponse(
+data class FeedPostListDto(
     val feedPostId: Long,
     val title: String,
     val content: String,

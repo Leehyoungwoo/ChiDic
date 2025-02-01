@@ -1,4 +1,4 @@
-package com.chidiccommon.dto
+package com.chidicapp.api.response
 
 data class TokenResponse (
     val accessToken: String

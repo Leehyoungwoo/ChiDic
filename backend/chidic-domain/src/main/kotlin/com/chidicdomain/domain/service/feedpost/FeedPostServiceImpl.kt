@@ -1,8 +1,5 @@
 package com.chidicdomain.domain.service.feedpost
 
-import com.chidiccommon.dto.FeedPostCreateRequest
-import com.chidiccommon.dto.FeedPostListResponse
-import com.chidiccommon.dto.FeedPostUpdateRequest
 import com.chidiccommon.exception.ExceptionMessage.FEED_POST_NOT_FOUND
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidiccommon.exception.exceptions.FeedPostNotFoundException
@@ -15,6 +12,7 @@ import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
+import com.chidicdomain.dto.FeedPostListDto
 import com.chidicdomain.dto.FeedPostUpdateDto
 import com.chidicdomain.redis.service.RedisService
 import org.springframework.data.domain.PageRequest
@@ -32,14 +30,13 @@ class FeedPostServiceImpl(
     private val feedPostLikeRepository: FeedPostLikeRepository,
     private val redisService: RedisService
 ) : FeedPostService {
-    override fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int, start: Long): List<FeedPostListResponse> {
+    override fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int, start: Long): List<FeedPostListDto> {
         val user = userRepository.getReferenceById(userId)
         val pageable = if (lastFeedPostId == null) {
             PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
         } else {
             PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
         }
-        println("사용자 PK " + userId)
 
         val followList = followRepository.findAllByFollower(user)
 
@@ -72,7 +69,7 @@ class FeedPostServiceImpl(
 
         // 5. Response로 변환
         return paginatedPosts.map { feedPost ->
-            FeedPostListResponse(
+            FeedPostListDto(
                 feedPostId = feedPost.id,
                 title = feedPost.title,
                 content = feedPost.content,

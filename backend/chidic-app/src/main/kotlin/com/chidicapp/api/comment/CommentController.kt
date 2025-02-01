@@ -4,6 +4,7 @@ import com.chidicapp.api.request.CommentRequest
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.comment.CommentService
 import com.chidicdomain.dto.CommentCreateDto
+import com.chidicdomain.dto.CommentUpdateDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -30,7 +31,8 @@ class CommentController(
         @GetUserIdFromPrincipal userId: Long,
         @RequestBody commentRequest: CommentRequest
     ) {
-        commentService.updateComment(commentId, commentRequest)
+        val commentUpdateDto = CommentRequestMapper.requestToCommentUpdateDto(commentId, commentRequest)
+        commentService.updateComment(commentUpdateDto)
     }
 
     // 작성인만 삭제할 수 있게 인가처리 필요
@@ -49,6 +51,13 @@ object CommentRequestMapper {
         return CommentCreateDto(
             userId = userId,
             feedPostId = feedPostId,
+            content = commentRequest.content
+        )
+    }
+
+    fun requestToCommentUpdateDto(commentId: Long, commentRequest: CommentRequest): CommentUpdateDto {
+        return CommentUpdateDto(
+            commentId = commentId,
             content = commentRequest.content
         )
     }

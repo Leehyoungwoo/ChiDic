@@ -1,4 +1,4 @@
-package com.chidiccommon.dto
+package com.chidicapp.api.request
 
 data class FeedPostCreateRequest(
     val title: String,

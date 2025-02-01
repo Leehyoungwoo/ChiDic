@@ -1,26 +1,17 @@
 package com.chidicapp.api.feedpost
 
-import com.chidicapp.api.feedpostlike.FeedPostLikeMapper
-import com.chidiccommon.dto.FeedPostCreateRequest
+import com.chidicapp.api.request.FeedPostCreateRequest
+import com.chidicapp.api.request.FeedPostUpdateRequest
 import com.chidicapp.api.response.FeedPostDetailResponse
-import com.chidiccommon.dto.FeedPostListResponse
-import com.chidiccommon.dto.FeedPostUpdateRequest
+import com.chidicapp.api.response.FeedPostListResponse
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.feedpost.FeedPostService
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
+import com.chidicdomain.dto.FeedPostListDto
 import com.chidicdomain.dto.FeedPostUpdateDto
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/feedposts")
@@ -33,8 +24,11 @@ class FeedPostController(
         @RequestParam(required = false) lastFeedPostId: Long?,
         @RequestParam(required = false, defaultValue = "20") size: Int,
         @RequestParam(required = false, defaultValue = "0") start: Long,
-        @GetUserIdFromPrincipal userId: Long): List<FeedPostListResponse> {
-        return feedPostService.getFollowedUsersFeed(userId, lastFeedPostId, size, start)
+        @GetUserIdFromPrincipal userId: Long): FeedPostListResponse {
+        val followedUsersFeedList = feedPostService.getFollowedUsersFeed(userId, lastFeedPostId, size, start)
+        return FeedPostListResponse(
+            feePosts = followedUsersFeedList
+        )
     }
 
     @GetMapping("/{feedPostId}")

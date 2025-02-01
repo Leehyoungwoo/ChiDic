@@ -2,7 +2,7 @@ package com.chidicapp.api.user
 
 import com.chidicapp.api.request.UserProfileImageUpdateRequest
 import com.chidicapp.api.response.UserInfoResponse
-import com.chidiccommon.dto.UsernameUpdateRequest
+import com.chidicapp.api.request.UsernameUpdateRequest
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.user.UserService
 import com.chidicdomain.dto.UserInfoDto
@@ -34,7 +34,8 @@ class UserController(
     @PatchMapping("/username")
     @ResponseStatus(HttpStatus.OK)
     fun updateUsername(@GetUserIdFromPrincipal userId: Long,
-                       @RequestBody usernameUpdateRequest: UsernameUpdateRequest) {
+                       @RequestBody usernameUpdateRequest: UsernameUpdateRequest
+    ) {
         userService.updateUsername(UserMapper.requestToUsernameUpdateDto(userId, usernameUpdateRequest))
     }
 

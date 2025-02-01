@@ -1,7 +1,6 @@
 package com.chidicdomain.domain.mapper.feedpost
 
 import com.chidiccommon.dto.CommentDto
-import com.chidiccommon.dto.FeedPostCreateRequest
 import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.dto.FeedPostCreateDto

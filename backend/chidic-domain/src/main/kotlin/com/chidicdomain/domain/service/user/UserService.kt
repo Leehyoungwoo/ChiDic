@@ -1,8 +1,6 @@
 package com.chidicdomain.domain.service.user
 
 import com.chidiccommon.dto.OAuth2UserInfo
-import com.chidicapp.api.request.UserProfileImageUpdateRequest
-import com.chidiccommon.dto.UsernameUpdateRequest
 import com.chidiccommon.enum.Provider
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.dto.UserInfoDto

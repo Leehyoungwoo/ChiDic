@@ -1,6 +1,5 @@
 package com.chidicdomain.domain.entity
 
-import com.chidiccommon.dto.FeedPostUpdateRequest
 import com.chidicdomain.dto.FeedPostUpdateDto
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*

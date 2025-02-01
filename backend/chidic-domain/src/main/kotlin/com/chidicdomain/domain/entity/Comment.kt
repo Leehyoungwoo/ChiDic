@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.chidicapp.api.request.CommentRequest
+import com.chidicdomain.dto.CommentUpdateDto
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
 
@@ -22,7 +22,7 @@ class Comment (
     @Column(name = "content", nullable = false, length = 255)
     var content: String
 ): BaseEntity() {
-    fun updateContent(commentRequest: CommentRequest) {
-        content = commentRequest.content
+    fun updateContent(commentUpdateDto: CommentUpdateDto) {
+        content = commentUpdateDto.content
     }
 }

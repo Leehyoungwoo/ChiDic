@@ -1,7 +1,7 @@
 package com.chidicapp.api.auth
 
 import com.chidicapp.service.auth.AuthService
-import com.chidiccommon.dto.TokenResponse
+import com.chidicapp.api.response.TokenResponse
 import com.chidiccore.util.CookieUtils
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
