@@ -1,13 +1,13 @@
 package com.chidicapp.api.user
 
-import com.chidicapp.api.response.UserInfoResponse
 import com.chidicapp.api.request.UserProfileImageUpdateRequest
-import com.chidiccommon.dto.CommentRequest
+import com.chidicapp.api.response.UserInfoResponse
 import com.chidiccommon.dto.UsernameUpdateRequest
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.user.UserService
 import com.chidicdomain.dto.UserInfoDto
 import com.chidicdomain.dto.UserProfileUpdateDto
+import com.chidicdomain.dto.UsernameUpdateDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -25,17 +25,17 @@ class UserController(
 
     @PatchMapping("/profile-picture")
     @ResponseStatus(HttpStatus.OK)
-    fun updateProfileImage(@GetUserIdFromPrincipal id: Long,
+    fun updateProfileImage(@GetUserIdFromPrincipal userId: Long,
                            @RequestBody userProfileImageUpdateRequest: UserProfileImageUpdateRequest
     ) {
-        userService.updateProfileImage(UserMapper.requestToUserUpdateDto(id, userProfileImageUpdateRequest))
+        userService.updateProfileImage(UserMapper.requestToUserUpdateDto(userId, userProfileImageUpdateRequest))
     }
 
     @PatchMapping("/username")
     @ResponseStatus(HttpStatus.OK)
     fun updateUsername(@GetUserIdFromPrincipal userId: Long,
                        @RequestBody usernameUpdateRequest: UsernameUpdateRequest) {
-        userService.updateUsername(userId, usernameUpdateRequest)
+        userService.updateUsername(UserMapper.requestToUsernameUpdateDto(userId, usernameUpdateRequest))
     }
 
     @DeleteMapping
@@ -59,6 +59,13 @@ object UserMapper{
         return UserProfileUpdateDto(
             id = id,
             newImage = request.newImage
+        )
+    }
+
+    fun requestToUsernameUpdateDto(id: Long, usernameUpdateRequest: UsernameUpdateRequest): UsernameUpdateDto {
+        return UsernameUpdateDto(
+            id = id,
+            username = usernameUpdateRequest.username,
         )
     }
 }

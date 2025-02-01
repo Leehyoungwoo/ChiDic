@@ -11,6 +11,7 @@ import com.chidicdomain.domain.mapper.user.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.dto.UserInfoDto
 import com.chidicdomain.dto.UserProfileUpdateDto
+import com.chidicdomain.dto.UsernameUpdateDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -44,10 +45,10 @@ class UserServiceImpl(
     }
 
     @Transactional
-    override fun updateUsername(id: Long, usernameUpdateRequest: UsernameUpdateRequest) {
-        val user = userRepository.findById(id)
+    override fun updateUsername(usernameUpdateDto: UsernameUpdateDto) {
+        val user = userRepository.findById(usernameUpdateDto.id)
             .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
-        user.updateUsername(usernameUpdateRequest.username)
+        user.updateUsername(usernameUpdateDto.username)
     }
 
     @Transactional
