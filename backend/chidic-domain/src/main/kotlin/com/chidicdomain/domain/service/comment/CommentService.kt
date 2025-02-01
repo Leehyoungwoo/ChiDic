@@ -1,9 +1,12 @@
 package com.chidicdomain.domain.service.comment
 
-import com.chidiccommon.dto.CommentRequest
+import com.chidicdomain.dto.CommentCreateDto
+import com.chidicdomain.dto.CommentUpdateDto
 
 interface CommentService {
-    fun createComment(feedPostId: Long, userId: Long, commentRequest: CommentRequest)
-    fun updateComment(commentId: Long, commentRequest: CommentRequest)
+    fun createComment(commentCreateDto: CommentCreateDto)
+    fun updateComment(commentUpdateDto: CommentUpdateDto)
     fun deleteComment(commentId: Long)
 }
+
+class CommentNotFoundException(message: String) : RuntimeException(message)

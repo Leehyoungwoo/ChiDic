@@ -1,12 +1,14 @@
 package com.chidicdomain.domain.service.comment
 
-import com.chidiccommon.dto.CommentRequest
-import com.chidiccommon.exception.ExceptionMessage.*
-import com.chidiccommon.exception.exceptions.CommentNotFoundException
-import com.chidicdomain.domain.mapper.comment.CommentMapper
+import com.chidiccommon.exception.ExceptionMessage.COMMENT_NOT_FOUND
+import com.chidicdomain.domain.entity.Comment
+import com.chidicdomain.domain.entity.FeedPost
+import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.repository.CommentRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.UserRepository
+import com.chidicdomain.dto.CommentCreateDto
+import com.chidicdomain.dto.CommentUpdateDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,22 +18,21 @@ class CommentServiceImpl(
     private val commentRepository: CommentRepository,
     private val userRepository: UserRepository,
     private val feedPostRepository: FeedPostRepository,
-    private val commentMapper: CommentMapper
 ) : CommentService {
     @Transactional
-    override fun createComment(feedPostId: Long, userId: Long, commentRequest: CommentRequest) {
-        val user = userRepository.getReferenceById(userId)
-        val feedPost = feedPostRepository.getReferenceById(feedPostId)
+    override fun createComment(commentCreateDto: CommentCreateDto) {
+        val user = userRepository.getReferenceById(commentCreateDto.userId)
+        val feedPost = feedPostRepository.getReferenceById(commentCreateDto.feedPostId)
 
-        val newComment = commentMapper.toEntity(user, feedPost, commentRequest)
+        val newComment = CommentEntityMapper.toEntity(user, feedPost, commentCreateDto)
         commentRepository.save(newComment)
     }
 
     @Transactional
-    override fun updateComment(commentId: Long, commentRequest: CommentRequest) {
-        val comment = commentRepository.findById(commentId)
+    override fun updateComment(commentUpdateDto: CommentUpdateDto) {
+        val comment = commentRepository.findById(commentUpdateDto.commentId)
             .orElseThrow { CommentNotFoundException(COMMENT_NOT_FOUND.message) }
-        comment.updateContent(commentRequest)
+        comment.updateContent(commentUpdateDto)
     }
 
     @Transactional
@@ -39,5 +40,15 @@ class CommentServiceImpl(
         val comment = commentRepository.findById(commentId)
             .orElseThrow { CommentNotFoundException(COMMENT_NOT_FOUND.message) }
         comment.deleteData()
+    }
+}
+
+object CommentEntityMapper{
+    fun toEntity(user: User, feedPost: FeedPost, commentCreateDto: CommentCreateDto): Comment {
+        return Comment(
+            user = user,
+            feedPost = feedPost,
+            content = commentCreateDto.content
+        )
     }
 }

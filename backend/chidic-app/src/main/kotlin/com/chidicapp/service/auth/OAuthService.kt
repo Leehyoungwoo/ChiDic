@@ -1,7 +1,7 @@
 package com.chidicapp.service.auth
 
-import com.chidiccommon.dto.OAuth2UserInfo
+import com.chidicdomain.dto.OAuth2UserInfoDto
 
 interface OAuthService {
-    fun getUserInfo(accessToken: String): OAuth2UserInfo
+    fun getUserInfo(accessToken: String): OAuth2UserInfoDto
 }

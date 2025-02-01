@@ -1,6 +1,6 @@
 package com.chidicdomain.domain.entity
 
-import com.chidiccommon.dto.FeedPostUpdateRequest
+import com.chidicdomain.dto.FeedPostUpdateDto
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
@@ -26,8 +26,8 @@ class FeedPost(
     @OneToMany(mappedBy = "feedPost", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var comments: MutableList<Comment> = mutableListOf()
 ): BaseEntity() {
-    fun updateFeedPost(feedPostUpdateRequest: FeedPostUpdateRequest) {
-        title = feedPostUpdateRequest.title
-        content = feedPostUpdateRequest.content
+    fun updateFeedPost(feedPostUpdateDto: FeedPostUpdateDto) {
+        title = feedPostUpdateDto.title
+        content = feedPostUpdateDto.content
     }
 }

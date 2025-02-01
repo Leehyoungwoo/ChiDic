@@ -1,9 +1,12 @@
 package com.chidicapp.api.comment
 
-import com.chidiccommon.dto.CommentRequest
-import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.api.request.CommentRequest
+import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidicdomain.domain.service.comment.CommentService
+import com.chidicdomain.dto.CommentCreateDto
+import com.chidicdomain.dto.CommentUpdateDto
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -15,10 +18,11 @@ class CommentController(
     @ResponseStatus(HttpStatus.OK)
     fun createComment(
         @PathVariable feedPostId: Long,
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @RequestBody commentRequest: CommentRequest
     ) {
-        commentService.createComment(feedPostId, userId, commentRequest)
+        val userId = principal.getId()
+        commentService.createComment(CommentRequestMapper.requestToCommentCreateDto(userId, feedPostId, commentRequest))
     }
 
     // 아무나 댓글 삭제할 수 없게 인가 처리 필요
@@ -26,10 +30,11 @@ class CommentController(
     @ResponseStatus(HttpStatus.OK)
     fun updateComment(
         @PathVariable commentId: Long,
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @RequestBody commentRequest: CommentRequest
     ) {
-        commentService.updateComment(commentId, commentRequest)
+        val commentUpdateDto = CommentRequestMapper.requestToCommentUpdateDto(commentId, commentRequest)
+        commentService.updateComment(commentUpdateDto)
     }
 
     // 작성인만 삭제할 수 있게 인가처리 필요
@@ -37,8 +42,25 @@ class CommentController(
     @ResponseStatus(HttpStatus.OK)
     fun deleteComment(
         @PathVariable commentId: Long,
-        @GetUserIdFromPrincipal userId: Long
+        @AuthenticationPrincipal principal: OAuth2UserDetails
     ) {
         commentService.deleteComment(commentId)
+    }
+}
+
+object CommentRequestMapper {
+    fun requestToCommentCreateDto(userId: Long, feedPostId: Long, commentRequest: CommentRequest): CommentCreateDto {
+        return CommentCreateDto(
+            userId = userId,
+            feedPostId = feedPostId,
+            content = commentRequest.content
+        )
+    }
+
+    fun requestToCommentUpdateDto(commentId: Long, commentRequest: CommentRequest): CommentUpdateDto {
+        return CommentUpdateDto(
+            commentId = commentId,
+            content = commentRequest.content
+        )
     }
 }
