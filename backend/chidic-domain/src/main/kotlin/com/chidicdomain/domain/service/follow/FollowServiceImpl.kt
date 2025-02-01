@@ -1,6 +1,5 @@
 package com.chidicdomain.domain.service.follow
 
-import com.chidiccommon.dto.FollowCountResponse
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidiccommon.exception.exceptions.UserNotFoundException
 import com.chidicdomain.domain.entity.Follow
@@ -8,6 +7,7 @@ import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.entity.id.FollowId
 import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
+import com.chidicdomain.dto.FollowCountDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,7 +17,7 @@ class FollowServiceImpl(
     private val userRepository: UserRepository,
     private val followRepository: FollowRepository
 ) : FollowService {
-    override fun getFollowerAndFolloweeCount(userId: Long): FollowCountResponse{
+    override fun getFollowerAndFolloweeCount(userId: Long): FollowCountDto{
         val targetUser = userRepository.findById(userId)
             .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
 
@@ -25,7 +25,7 @@ class FollowServiceImpl(
 
         val followingCount = followRepository.countByFollower(targetUser)
 
-        return FollowCountResponse(
+        return FollowCountDto(
             followerCount = followerCount,
             followingCount = followingCount
         )

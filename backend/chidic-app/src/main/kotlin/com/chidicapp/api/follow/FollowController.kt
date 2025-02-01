@@ -1,8 +1,9 @@
 package com.chidicapp.api.follow
 
-import com.chidiccommon.dto.FollowCountResponse
+import com.chidicapp.api.response.FollowCountResponse
 import com.chidiccore.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicdomain.domain.service.follow.FollowService
+import com.chidicdomain.dto.FollowCountDto
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -16,7 +17,8 @@ class FollowController(
     fun followerAndFolloweeCount(
         @GetUserIdFromPrincipal userId: Long
     ): FollowCountResponse {
-        return followService.getFollowerAndFolloweeCount(userId)
+        val FollowCountDto = followService.getFollowerAndFolloweeCount(userId)
+        return FollowMapper.dtoToFollowCountResponse(FollowCountDto)
     }
 
 
@@ -36,5 +38,14 @@ class FollowController(
         @GetUserIdFromPrincipal userId: Long
     ) {
         followService.unfollow(userId, followeeId)
+    }
+}
+
+object FollowMapper {
+    fun dtoToFollowCountResponse(followCountDto: FollowCountDto): FollowCountResponse {
+        return FollowCountResponse(
+            followerCount = followCountDto.followerCount,
+            followingCount = followCountDto.followingCount,
+        )
     }
 }
