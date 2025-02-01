@@ -17,8 +17,8 @@ class FollowController(
     fun followerAndFolloweeCount(
         @GetUserIdFromPrincipal userId: Long
     ): FollowCountResponse {
-        val FollowCountDto = followService.getFollowerAndFolloweeCount(userId)
-        return FollowMapper.dtoToFollowCountResponse(FollowCountDto)
+        val followCountDto = followService.getFollowerAndFolloweeCount(userId)
+        return FollowMapper.dtoToFollowCountResponse(followCountDto)
     }
 
 
