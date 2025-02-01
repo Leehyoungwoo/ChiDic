@@ -1,6 +1,6 @@
 package com.domain.service
 
-import com.chidiccommon.dto.UserProfileImageUpdateRequest
+import com.chidicapp.api.request.UserProfileImageUpdateRequest
 import com.chidiccommon.enum.Provider
 import com.chidicdomain.domain.entity.User
 import com.chidiccommon.enum.Role
