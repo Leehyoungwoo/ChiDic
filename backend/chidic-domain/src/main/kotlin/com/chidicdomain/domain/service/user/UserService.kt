@@ -16,3 +16,5 @@ interface UserService {
     fun delete(id: Long): Unit
     fun getUser(id: Long): User
 }
+
+class UserNotFoundException(message: String) : RuntimeException(message)
