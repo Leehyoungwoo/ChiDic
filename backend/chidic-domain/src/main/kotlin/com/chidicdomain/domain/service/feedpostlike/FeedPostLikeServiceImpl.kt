@@ -1,6 +1,5 @@
 package com.chidicdomain.domain.service.feedpostlike
 
-import com.chidiccommon.dto.FeedLikeResponse
 import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.domain.entity.FeedPostLIke
 import com.chidicdomain.domain.entity.User
@@ -8,6 +7,7 @@ import com.chidicdomain.domain.entity.id.PostLikeId
 import com.chidicdomain.domain.repository.FeedPostLikeRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.UserRepository
+import com.chidicdomain.dto.FeedLikeDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,10 +19,10 @@ class FeedPostLikeServiceImpl(
     private val feedPostLikeRepository: FeedPostLikeRepository
 ) : FeedPostLikeService {
 
-    override fun getLikeCount(feedPostId: Long): FeedLikeResponse {
+    override fun getLikeCount(feedPostId: Long): FeedLikeDto {
         val feedPost = feedPostRepository.getReferenceById(feedPostId)
         val postLikes = feedPostLikeRepository.findByFeedPost(feedPost)
-        return FeedLikeResponse(
+        return FeedLikeDto(
             postId = feedPostId,
             likeCount = postLikes.size.toLong()
         )
