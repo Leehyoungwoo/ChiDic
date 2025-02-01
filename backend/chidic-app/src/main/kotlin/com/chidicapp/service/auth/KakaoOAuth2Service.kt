@@ -1,6 +1,7 @@
 package com.chidicapp.service.auth
 
 import com.chidiccommon.dto.OAuth2UserInfo
+import com.chidiccommon.enum.Provider
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -38,6 +39,7 @@ class KakaoOAuth2Service(
         return OAuth2UserInfo(
             username = responseBody["id"]?.toString() ?: throw IllegalStateException("Missing id in response"),
             email = kakaoAccount["email"]?.toString().orEmpty(),
+            provider = Provider.KAKAO
         )
     }
 }

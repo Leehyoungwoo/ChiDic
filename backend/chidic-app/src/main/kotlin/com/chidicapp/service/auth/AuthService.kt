@@ -27,7 +27,7 @@ class AuthService(
     }
 
     private fun registerUser(kakaoUserInfo: OAuth2UserInfo): User {
-        return userService.create(kakaoUserInfo, Provider.KAKAO)
+        return userService.create(kakaoUserInfo)
     }
 
     fun refreshAccessToken(refreshToken: String): TokenDto {
