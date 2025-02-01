@@ -3,7 +3,6 @@ package com.chidicapp.api.user
 import com.chidicapp.api.request.UserProfileImageUpdateRequest
 import com.chidicapp.api.request.UsernameUpdateRequest
 import com.chidicapp.api.response.UserInfoResponse
-import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidicdomain.domain.service.user.UserService
 import com.chidicdomain.dto.UserInfoDto

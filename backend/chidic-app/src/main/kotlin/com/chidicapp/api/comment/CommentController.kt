@@ -1,11 +1,12 @@
 package com.chidicapp.api.comment
 
 import com.chidicapp.api.request.CommentRequest
-import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
+import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidicdomain.domain.service.comment.CommentService
 import com.chidicdomain.dto.CommentCreateDto
 import com.chidicdomain.dto.CommentUpdateDto
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,9 +18,10 @@ class CommentController(
     @ResponseStatus(HttpStatus.OK)
     fun createComment(
         @PathVariable feedPostId: Long,
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @RequestBody commentRequest: CommentRequest
     ) {
+        val userId = principal.getId()
         commentService.createComment(CommentRequestMapper.requestToCommentCreateDto(userId, feedPostId, commentRequest))
     }
 
@@ -28,7 +30,7 @@ class CommentController(
     @ResponseStatus(HttpStatus.OK)
     fun updateComment(
         @PathVariable commentId: Long,
-        @GetUserIdFromPrincipal userId: Long,
+        @AuthenticationPrincipal principal: OAuth2UserDetails,
         @RequestBody commentRequest: CommentRequest
     ) {
         val commentUpdateDto = CommentRequestMapper.requestToCommentUpdateDto(commentId, commentRequest)
@@ -40,7 +42,7 @@ class CommentController(
     @ResponseStatus(HttpStatus.OK)
     fun deleteComment(
         @PathVariable commentId: Long,
-        @GetUserIdFromPrincipal userId: Long
+        @AuthenticationPrincipal principal: OAuth2UserDetails
     ) {
         commentService.deleteComment(commentId)
     }

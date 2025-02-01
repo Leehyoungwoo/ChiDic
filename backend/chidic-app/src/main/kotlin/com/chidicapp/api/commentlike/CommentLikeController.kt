@@ -1,6 +1,5 @@
 package com.chidicapp.api.commentlike
 
-import com.chidicapp.security.auth.annotatiton.GetUserIdFromPrincipal
 import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidicdomain.domain.service.commentlike.CommentLikeService
 import org.springframework.http.HttpStatus
