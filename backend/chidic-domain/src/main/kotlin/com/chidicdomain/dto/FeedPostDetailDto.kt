@@ -1,6 +1,5 @@
 package com.chidicdomain.dto
 
-import com.chidiccommon.dto.CommentDto
 import java.time.LocalDateTime
 
 data class FeedPostDetailDto(

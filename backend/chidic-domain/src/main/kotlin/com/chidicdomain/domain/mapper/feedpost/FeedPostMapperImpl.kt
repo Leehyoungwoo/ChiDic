@@ -1,8 +1,8 @@
 package com.chidicdomain.domain.mapper.feedpost
 
-import com.chidiccommon.dto.CommentDto
 import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.domain.entity.User
+import com.chidicdomain.dto.CommentDto
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
 import org.springframework.stereotype.Component

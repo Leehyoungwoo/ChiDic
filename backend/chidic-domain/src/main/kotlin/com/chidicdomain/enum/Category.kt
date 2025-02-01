@@ -1,4 +1,4 @@
-package com.chidiccommon.enum
+package com.chidicdomain.enum
 
 enum class Category {
     OS,

@@ -1,6 +1,6 @@
 package com.chidicapp.api.response
 
-import com.chidiccommon.dto.CommentDto
+import com.chidicdomain.dto.CommentDto
 import java.time.LocalDateTime
 
 data class FeedPostDetailResponse(

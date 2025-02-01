@@ -1,4 +1,4 @@
-package com.chidiccommon.dto
+package com.chidicdomain.dto
 
 import java.time.LocalDateTime
 

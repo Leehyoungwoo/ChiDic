@@ -1,4 +1,4 @@
-package com.chidiccommon.dto
+package com.chidicdomain.dto
 
 data class TokenDto (
     val accessToken: String,

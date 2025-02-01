@@ -1,11 +1,11 @@
 package com.chidicapp.service.auth
 
-import com.chidiccommon.dto.OAuth2UserInfo
-import com.chidiccommon.dto.TokenDto
-import com.chidiccommon.enum.Provider
 import com.chidicapp.security.jwt.util.JwtProvider
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.service.user.UserService
+import com.chidicdomain.dto.OAuth2UserInfoDto
+import com.chidicdomain.dto.TokenDto
+import com.chidicdomain.enum.Provider
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,7 +26,7 @@ class AuthService(
         return TokenDto(accessToken, refreshToken)
     }
 
-    private fun registerUser(kakaoUserInfo: OAuth2UserInfo): User {
+    private fun registerUser(kakaoUserInfo: OAuth2UserInfoDto): User {
         return userService.create(kakaoUserInfo)
     }
 
