@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25" apply false
@@ -53,6 +55,11 @@ subprojects {
     kotlin {
         compilerOptions {
             freeCompilerArgs.addAll("-Xjsr305=strict")
+        }
+    }
+    tasks.withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "21"
         }
     }
 }
