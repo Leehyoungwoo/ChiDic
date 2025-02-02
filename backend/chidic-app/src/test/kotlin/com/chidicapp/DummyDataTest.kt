@@ -1,5 +1,6 @@
 package com.chidicapp
 
+import com.chidicapp.api.request.FeedPostCreateRequest
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.type.Provider
@@ -56,6 +57,35 @@ class DummyDataTest {
 
             // POST 요청 보내기
             val response: ResponseEntity<String> = testRestTemplate.exchange(url, HttpMethod.POST, entity, String::class.java)
+        }
+    }
+
+    @Test
+    fun `모든 유저 100개의 글 작성`() {
+        for (userId in 2..1001) {
+            val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
+                "http://localhost:8080/api/make-access-token/$userId", HttpMethod.POST, HttpEntity.EMPTY, String::class.java
+            )
+            val token = tokenResponse.body
+            if (token != null) {
+                for (i in 1..100) {
+                    val feedPostRequest = FeedPostCreateRequest(
+                        title = "새글 $userId $i 번째 제목",
+                        content = "내용 $userId $i 번째 내용",
+                        )
+
+                    val headers = HttpHeaders().apply {
+                        set("Authorization", "Bearer $token")
+                    }
+                    val entity = HttpEntity(feedPostRequest, headers)
+
+                    val postResponse: ResponseEntity<Void> = testRestTemplate.exchange(
+                        "http://localhost:8080/api/feedposts", HttpMethod.POST, entity, Void::class.java
+                    )
+
+                    println("글 작성 요청 결과 : $postResponse.statusCode")
+                }
+            }
         }
     }
 }
