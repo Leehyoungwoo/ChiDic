@@ -6,7 +6,8 @@ import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+    indexes = [Index(name = "idx_email", columnList = "email")])
 @SQLRestriction("is_deleted = false")
 class User(
     @Id
