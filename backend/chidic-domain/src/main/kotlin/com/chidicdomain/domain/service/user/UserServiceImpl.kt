@@ -1,14 +1,14 @@
 package com.chidicdomain.domain.service.user
 
+import com.chidiccommon.dto.OAuth2UserInfoDto
 import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.mapper.user.UserMapper
 import com.chidicdomain.domain.repository.UserRepository
-import com.chidicdomain.dto.OAuth2UserInfoDto
 import com.chidicdomain.dto.UserInfoDto
 import com.chidicdomain.dto.UserProfileUpdateDto
 import com.chidicdomain.dto.UsernameUpdateDto
-import com.chidicdomain.enum.Provider
+import com.chidicdomain.type.Provider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
