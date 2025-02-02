@@ -1,4 +1,4 @@
-package com.chidicdomain.enum
+package com.chidicdomain.type
 
 enum class FriendStatus {
     PENDING,

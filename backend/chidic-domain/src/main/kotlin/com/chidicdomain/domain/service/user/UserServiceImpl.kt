@@ -8,7 +8,7 @@ import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.dto.UserInfoDto
 import com.chidicdomain.dto.UserProfileUpdateDto
 import com.chidicdomain.dto.UsernameUpdateDto
-import com.chidicdomain.enum.Provider
+import com.chidicdomain.type.Provider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

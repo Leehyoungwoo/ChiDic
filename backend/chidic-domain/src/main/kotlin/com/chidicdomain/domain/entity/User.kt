@@ -1,7 +1,7 @@
 package com.chidicdomain.domain.entity
 
-import com.chidicdomain.enum.Provider
-import com.chidicdomain.enum.Role
+import com.chidicdomain.type.Provider
+import com.chidicdomain.type.Role
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLRestriction
 

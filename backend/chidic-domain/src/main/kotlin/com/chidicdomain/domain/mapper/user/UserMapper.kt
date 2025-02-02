@@ -3,10 +3,11 @@ package com.chidicdomain.domain.mapper.user
 import com.chidiccommon.dto.OAuth2UserInfoDto
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.dto.UserInfoDto
-import com.chidicdomain.enum.Provider
+import com.chidicdomain.type.Provider
 import org.mapstruct.EnumMapping
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
+import org.mapstruct.MappingConstants
 
 @Mapper(componentModel = "spring")
 interface UserMapper {
@@ -15,7 +16,6 @@ interface UserMapper {
 
     fun toInfoDto(user: User): UserInfoDto
 
-    @EnumMapping(nameTransformationStrategy = "uppercase")
+    @EnumMapping(nameTransformationStrategy = MappingConstants.CASE_TRANSFORMATION, configuration = "upper")
     fun mapProvider(provider: String): Provider
-
 }

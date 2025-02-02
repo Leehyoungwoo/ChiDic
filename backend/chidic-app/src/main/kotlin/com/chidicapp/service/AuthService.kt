@@ -1,11 +1,11 @@
-package com.chidicapp.service.auth
+package com.chidicapp.service
 
 import com.chidicapp.security.jwt.util.JwtProvider
 import com.chidiccommon.dto.OAuth2UserInfoDto
 import com.chidicdomain.domain.entity.User
 import com.chidicdomain.domain.service.user.UserService
 import com.chidicdomain.dto.TokenDto
-import com.chidicdomain.enum.Provider
+import com.chidicdomain.type.Provider
 import com.chidicexternal.oauth.KakaoOAuthApiClient
 import org.springframework.stereotype.Service
 

@@ -5,7 +5,7 @@ import com.chidicdomain.domain.entity.User
 import com.chidicdomain.dto.UserInfoDto
 import com.chidicdomain.dto.UserProfileUpdateDto
 import com.chidicdomain.dto.UsernameUpdateDto
-import com.chidicdomain.enum.Provider
+import com.chidicdomain.type.Provider
 
 interface UserService {
     fun getUserInfo(id: Long): UserInfoDto
