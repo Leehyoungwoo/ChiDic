@@ -1,22 +1,21 @@
-package com.chidicapp.service.auth
+package com.chidicexternal.oauth
 
-import com.chidicdomain.dto.OAuth2UserInfoDto
-import com.chidicdomain.enum.Provider
+import com.chidiccommon.dto.OAuth2UserInfoDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-@Service
-class KakaoOAuth2Service(
+@Component
+class KakaoOAuthApiClient(
     private val restTemplate: RestTemplate,
     private val objectMapper: ObjectMapper,
     @Value("\${spring.security.oauth2.client.provider.kakao.user-info-uri}")
     private val kakaoUserInfoURL: String
-): OAuthService {
+): OAuthApiClient {
 
     override fun getUserInfo(accessToken: String): OAuth2UserInfoDto {
         val responseBody = fetchKakaoUserInfo(accessToken)
@@ -39,7 +38,7 @@ class KakaoOAuth2Service(
         return OAuth2UserInfoDto(
             username = responseBody["id"]?.toString() ?: throw IllegalStateException("Missing id in response"),
             email = kakaoAccount["email"]?.toString().orEmpty(),
-            provider = Provider.KAKAO
+            provider = "KAKAO"
         )
     }
 }

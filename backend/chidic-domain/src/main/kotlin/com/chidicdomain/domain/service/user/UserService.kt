@@ -1,11 +1,11 @@
 package com.chidicdomain.domain.service.user
 
-import com.chidicdomain.enum.Provider
+import com.chidiccommon.dto.OAuth2UserInfoDto
 import com.chidicdomain.domain.entity.User
-import com.chidicdomain.dto.OAuth2UserInfoDto
 import com.chidicdomain.dto.UserInfoDto
 import com.chidicdomain.dto.UserProfileUpdateDto
 import com.chidicdomain.dto.UsernameUpdateDto
+import com.chidicdomain.enum.Provider
 
 interface UserService {
     fun getUserInfo(id: Long): UserInfoDto

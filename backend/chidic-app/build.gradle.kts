@@ -8,9 +8,9 @@ dependencies {
 	// 하위 모듈 의존성
 	implementation(project(":chidic-domain"))
 	implementation(project(":chidic-common"))
+	implementation(project(":chidic-external"))
 
 	// 시큐리티  의존성
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	testImplementation("org.springframework.security:spring-security-test")
 
