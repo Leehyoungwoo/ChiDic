@@ -12,7 +12,10 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DummyDataTest {
@@ -42,7 +45,8 @@ class DummyDataTest {
 
     @Test
     fun `사용자 1이 모든 다른 사용자 팔로우하기`() {
-        val authHeader = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdXRob3JpdGllcyI6IlJPTEVfVVNFUiIsImlkIjoxLCJyb2xlIjoiVVNFUiIsImV4cCI6MTc0MDMwODM1MX0.98liRzzMjI78FSPR9gjL4-HT17ncFswmkLjbXLAI9IM"
+        val authHeader =
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdXRob3JpdGllcyI6IlJPTEVfVVNFUiIsImlkIjoxLCJyb2xlIjoiVVNFUiIsImV4cCI6MTc0MDMwODM1MX0.98liRzzMjI78FSPR9gjL4-HT17ncFswmkLjbXLAI9IM"
 
         for (userId in 2..1001) {
             // 팔로우 API URL
@@ -56,7 +60,8 @@ class DummyDataTest {
             val entity = HttpEntity<String>(headers)
 
             // POST 요청 보내기
-            val response: ResponseEntity<String> = testRestTemplate.exchange(url, HttpMethod.POST, entity, String::class.java)
+            val response: ResponseEntity<String> =
+                testRestTemplate.exchange(url, HttpMethod.POST, entity, String::class.java)
         }
     }
 
@@ -64,7 +69,10 @@ class DummyDataTest {
     fun `모든 유저 100개의 글 작성`() {
         for (userId in 2..1001) {
             val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
-                "http://localhost:8080/api/make-access-token/$userId", HttpMethod.POST, HttpEntity.EMPTY, String::class.java
+                "http://localhost:8080/api/make-access-token/$userId",
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String::class.java
             )
             val token = tokenResponse.body
             if (token != null) {
@@ -72,7 +80,7 @@ class DummyDataTest {
                     val feedPostRequest = FeedPostCreateRequest(
                         title = "새글 $userId $i 번째 제목",
                         content = "내용 $userId $i 번째 내용",
-                        )
+                    )
 
                     val headers = HttpHeaders().apply {
                         set("Authorization", "Bearer $token")
@@ -88,4 +96,41 @@ class DummyDataTest {
             }
         }
     }
+
+    @Test
+    fun `모든 유저가 모든 포스트에 좋아요 (하나의 메서드로 처리)`() {
+        for (userId in 2..50) {
+            val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
+                "http://localhost:8080/api/make-access-token/$userId",
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String::class.java
+            )
+            val token = tokenResponse.body
+            if (token != null) {
+                for (postId in 1..1000) {
+                    val headers = HttpHeaders().apply {
+                        set("Authorization", "Bearer $token")
+                        contentType = MediaType.APPLICATION_JSON
+                    }
+                    val entity = HttpEntity(null, headers)
+
+                    val response: ResponseEntity<Void> = testRestTemplate.exchange(
+                        "http://localhost:8080/api/feedposts/$postId/like",
+                        HttpMethod.POST,
+                        entity,
+                        Void::class.java
+                    )
+
+                    if (response.statusCode.is2xxSuccessful) {
+                        println("User $userId - Post $postId 좋아요 성공")
+                    } else {
+                        println("User $userId - Post $postId 실패: ${response.statusCode}")
+                    }
+                }
+            }
+        }
+    }
+
+
 }
