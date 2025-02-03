@@ -12,6 +12,7 @@ import org.mapstruct.MappingConstants
 @Mapper(componentModel = "spring")
 interface UserMapper {
     @Mapping(target = "provider", source = "provider")
+    @Mapping(target = "role", constant = "USER")
     fun toEntity(oAuth2UserInfDto: OAuth2UserInfoDto): User
 
     fun toInfoDto(user: User): UserInfoDto

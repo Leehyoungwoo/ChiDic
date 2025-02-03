@@ -21,12 +21,13 @@ abstract class BaseEntity {
 
     @PrePersist
     fun prePersist() {
+        println("작동")
         this.isDeleted = false
         this.createdAt = LocalDateTime.now()
         onPrePersist()
     }
 
-    protected open fun onPrePersist() {
+    protected fun onPrePersist() {
 
     }
 

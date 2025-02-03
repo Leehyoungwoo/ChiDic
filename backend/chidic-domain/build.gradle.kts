@@ -8,8 +8,8 @@ plugins {
 
 dependencies {
 	implementation(project(":chidic-common"))
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	api("org.springframework.boot:spring-boot-starter-data-jpa")
+	api("org.jetbrains.kotlin:kotlin-reflect")
 
 	// MapStruct 의존성
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
@@ -17,8 +17,8 @@ dependencies {
 	runtimeOnly("com.mysql:mysql-connector-j")
 
 	// 테스트를 위한 의존성
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("com.h2database:h2")
+	api("org.springframework.boot:spring-boot-starter-test")
+	api("com.h2database:h2")
 
 	// 레디스 의존성
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
