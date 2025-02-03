@@ -125,6 +125,7 @@ class DummyDataTest {
             }
         }
     }
+
     @Test
     fun `50명의 유저가 2000개의 포스트에 댓글 작성`() {
         for (userId in 2..51) {
@@ -159,6 +160,48 @@ class DummyDataTest {
                         println("User $userId - Post $postId 실패: ${response.statusCode}")
                     }
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `50명의 유저가 1번 글에 댓글 100개 작성`() {
+        for (userId in 1..1000) {
+            val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
+                "http://localhost:8080/api/make-access-token/$userId",
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String::class.java
+            )
+
+            val token = tokenResponse.body
+            if (token != null) {
+                // 1번 글에 100개의 댓글 달기
+                for (commentNumber in 1..2) {
+                    val headers = HttpHeaders().apply {
+                        set("Authorization", "Bearer $token")
+                        contentType = MediaType.APPLICATION_JSON
+                    }
+
+                    val commentRequest = mapOf("content" to "댓글$userId - $commentNumber 번째 댓글")
+
+                    val entity = HttpEntity(commentRequest, headers)
+
+                    val response: ResponseEntity<Void> = testRestTemplate.exchange(
+                        "http://localhost:8080/api/1/comments",
+                        HttpMethod.POST,
+                        entity,
+                        Void::class.java
+                    )
+
+                    if (response.statusCode.is2xxSuccessful) {
+                        println("User $userId - Comment $commentNumber 작성 성공")
+                    } else {
+                        println("User $userId - Comment $commentNumber 실패: ${response.statusCode}")
+                    }
+                }
+            } else {
+                println("User $userId - 토큰 발급 실패")
             }
         }
     }

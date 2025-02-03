@@ -82,8 +82,7 @@ class FeedPostServiceImpl(
     }
 
     override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
-        val feedPost = feedPostRepository.findById(feedPostId)
-            .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
+        val feedPost = feedPostRepository.findFeedPostWithUserAndComments(feedPostId)
         return feedPostMapper.toFeedPostDetailDto(feedPost)
     }
 
