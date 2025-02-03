@@ -74,7 +74,7 @@ class FeedPostServiceImpl(
                 content = feedPost.content,
                 writer = feedPost.user.username,
                 writerProfile = feedPost.user.profilePicture,
-                likeCount = feedPostLikeRepository.countByFeedPost(feedPost),
+                likeCount = feedPost.likeCount,
                 commentCont = feedPost.comments.size.toLong(),
                 createdAt = feedPost.createdAt
             )

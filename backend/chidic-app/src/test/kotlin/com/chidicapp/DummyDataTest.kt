@@ -205,4 +205,39 @@ class DummyDataTest {
             }
         }
     }
+
+    @Test
+    fun `1001명의 유저가 99981~100000번 포스트에 좋아요`() {
+        for (userId in 1..1001) {
+            val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
+                "http://localhost:8080/api/make-access-token/$userId",
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String::class.java
+            )
+            val token = tokenResponse.body
+            if (token != null) {
+                for (postId in 99981..100000) {
+                    val headers = HttpHeaders().apply {
+                        set("Authorization", "Bearer $token")
+                        contentType = MediaType.APPLICATION_JSON
+                    }
+                    val entity = HttpEntity(null, headers)
+
+                    val response: ResponseEntity<Void> = testRestTemplate.exchange(
+                        "http://localhost:8080/api/feedposts/$postId/like",
+                        HttpMethod.POST,
+                        entity,
+                        Void::class.java
+                    )
+
+                    if (response.statusCode.is2xxSuccessful) {
+                        println("User $userId - Post $postId 좋아요 성공")
+                    } else {
+                        println("User $userId - Post $postId 실패: ${response.statusCode}")
+                    }
+                }
+            }
+        }
+    }
 }

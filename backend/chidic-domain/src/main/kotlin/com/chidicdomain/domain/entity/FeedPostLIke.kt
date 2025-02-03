@@ -26,9 +26,11 @@ class FeedPostLIke(
 
     fun likePost() {
         isLiked = true
+        feedPost?.increaseLikeCount()
     }
 
     fun unlikePost() {
         isLiked = false
+        feedPost?.decreaseLikeCount()
     }
 }

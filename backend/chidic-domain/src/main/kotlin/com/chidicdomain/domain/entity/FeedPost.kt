@@ -23,11 +23,22 @@ class FeedPost(
     @Column(name = "content", nullable = false, length = 1000)
     var content: String,
 
+    @Column(name = "like_count", nullable = false)
+    var likeCount: Int = 0,
+
     @OneToMany(mappedBy = "feedPost", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var comments: MutableList<Comment> = mutableListOf()
 ): BaseEntity() {
     fun updateFeedPost(feedPostUpdateDto: FeedPostUpdateDto) {
         title = feedPostUpdateDto.title
         content = feedPostUpdateDto.content
+    }
+
+    fun increaseLikeCount() {
+        likeCount++
+    }
+
+    fun decreaseLikeCount() {
+        if (likeCount > 0) likeCount--
     }
 }
