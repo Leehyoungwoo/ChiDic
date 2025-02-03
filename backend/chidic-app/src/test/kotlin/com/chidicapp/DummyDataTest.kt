@@ -9,13 +9,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import org.springframework.http.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DummyDataTest {
@@ -98,7 +92,7 @@ class DummyDataTest {
     }
 
     @Test
-    fun `모든 유저가 모든 포스트에 좋아요 (하나의 메서드로 처리)`() {
+    fun `50명의 유저가 1000개의 포스트에 좋아요`() {
         for (userId in 2..50) {
             val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
                 "http://localhost:8080/api/make-access-token/$userId",
@@ -131,6 +125,41 @@ class DummyDataTest {
             }
         }
     }
+    @Test
+    fun `50명의 유저가 2000개의 포스트에 댓글 작성`() {
+        for (userId in 2..51) {
+            val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
+                "http://localhost:8080/api/make-access-token/$userId",
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String::class.java
+            )
+            val token = tokenResponse.body
+            if (token != null) {
+                for (postId in 1..2000) {
+                    val headers = HttpHeaders().apply {
+                        set("Authorization", "Bearer $token")
+                        contentType = MediaType.APPLICATION_JSON
+                    }
 
+                    val commentRequest = mapOf("content" to "댓글$userId")
 
+                    val entity = HttpEntity(commentRequest, headers)
+
+                    val response: ResponseEntity<Void> = testRestTemplate.exchange(
+                        "http://localhost:8080/api/$postId/comments",
+                        HttpMethod.POST,
+                        entity,
+                        Void::class.java
+                    )
+
+                    if (response.statusCode.is2xxSuccessful) {
+                        println("User $userId - Post $postId 댓글 작성 성공")
+                    } else {
+                        println("User $userId - Post $postId 실패: ${response.statusCode}")
+                    }
+                }
+            }
+        }
+    }
 }
