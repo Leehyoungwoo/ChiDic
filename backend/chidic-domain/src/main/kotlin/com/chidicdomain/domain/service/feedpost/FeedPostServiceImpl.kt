@@ -1,14 +1,10 @@
 package com.chidicdomain.domain.service.feedpost
 
 import com.chidiccommon.exception.ExceptionMessage.FEED_POST_NOT_FOUND
-import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
-import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.domain.mapper.feedpost.FeedPostMapper
-import com.chidicdomain.domain.repository.FeedPostLikeRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
-import com.chidicdomain.domain.service.user.UserNotFoundException
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
 import com.chidicdomain.dto.FeedPostListDto
@@ -26,59 +22,52 @@ class FeedPostServiceImpl(
     private val feedPostRepository: FeedPostRepository,
     private val feedPostMapper: FeedPostMapper,
     private val followRepository: FollowRepository,
-    private val feedPostLikeRepository: FeedPostLikeRepository,
     private val redisService: RedisService
 ) : FeedPostService {
     override fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int, start: Long): List<FeedPostListDto> {
-        val user = userRepository.getReferenceById(userId)
-        val pageable = if (lastFeedPostId == null) {
-            PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
-        } else {
-            PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
-        }
+        // Step 1️⃣: Redis에서 feedPostId 리스트 조회
+        val cachedFeedPostIds = redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
 
-        val followList = followRepository.findAllByFollower(user)
+        // Step 2️⃣: feedPostId 리스트 자체가 캐시 미스일 경우 → DB에서 가져오기
+        if (cachedFeedPostIds.isEmpty()) {
+            val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
+            val userList = followList.map { it.followee!! }
 
-        val userList = followList.map { it.followee!! }
-
-        val cachedFeedPosts = mutableListOf<FeedPost>()
-
-        userList.forEach { followee ->
-            val cachedPosts = redisService.getFeedPosts(followee.id, start, start + size)
-            if (cachedPosts.isNotEmpty()) {
-                // 캐시에서 피드를 가져왔다면 리스트에 추가
-                cachedFeedPosts.addAll(cachedPosts)
-            }
-        }
-
-        if (cachedFeedPosts.isEmpty()) {
-            val postsFromDb = feedPostRepository.findByUserIn(userList, pageable)
-            postsFromDb.forEach {
-                redisService.saveFeedPost(it.user.id, it)
-            }
-            cachedFeedPosts.addAll(postsFromDb)
-        }
-
-        val filteredPosts = cachedFeedPosts
-            .filter { lastFeedPostId == null || it.id < lastFeedPostId }
-            .sortedByDescending { it.createdAt }
-
-        // 4. 요청 크기(size)만큼 슬라이싱
-        val paginatedPosts = filteredPosts.take(size)
-
-        // 5. Response로 변환
-        return paginatedPosts.map { feedPost ->
-            FeedPostListDto(
-                feedPostId = feedPost.id,
-                title = feedPost.title,
-                content = feedPost.content,
-                writer = feedPost.user.username,
-                writerProfile = feedPost.user.profilePicture,
-                likeCount = feedPost.likeCount,
-                commentCont = feedPost.comments.size.toLong(),
-                createdAt = feedPost.createdAt
+            val postsFromDb = feedPostRepository.findByUserIn(
+                userList,
+                PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
             )
+
+            // Redis에 feedPostId 저장 & 개별 게시글 캐싱
+            postsFromDb.forEach {
+                val dto = feedPostMapper.toFeedPostListDto(it)
+                redisService.saveFeedPost(userId, dto) // feedPostId 저장
+                redisService.savaFeedPostDtoToHash(dto)   // 개별 게시글 캐싱
+            }
+
+            return postsFromDb.map { feedPostMapper.toFeedPostListDto(it) }
         }
+
+        // Step 3️⃣: 개별적으로 Redis에서 feedPostDto 조회 + 캐시 미스 처리
+        val (cachedFeedPosts, missingFeedPostIds) = cachedFeedPostIds
+            .map { it to redisService.getFeedPostFromHash(it) } // 개별 조회
+            .partition { it.second != null } // 캐시 히트/미스 분리
+
+        // Step 4️⃣: Redis에서 가져온 데이터 정리
+        val finalFeedPosts = cachedFeedPosts.map { it.second!! }.toMutableList()
+
+        // Step 5️⃣: 캐시 미스 난 경우, DB에서 조회 후 Redis에 저장
+        if (missingFeedPostIds.isNotEmpty()) {
+            val missingFeedPosts = feedPostRepository.findAllById(missingFeedPostIds.map { it.first })
+
+            missingFeedPosts.forEach { feedPost ->
+                val dto = feedPostMapper.toFeedPostListDto(feedPost)
+                redisService.savaFeedPostDtoToHash(dto) // Redis에 캐싱
+                finalFeedPosts.add(dto)
+            }
+        }
+
+        return finalFeedPosts.sortedByDescending { it.feedPostId }
     }
 
     override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
@@ -88,14 +77,21 @@ class FeedPostServiceImpl(
 
     @Transactional
     override fun createFeed(feedPostCreateDto: FeedPostCreateDto) {
-        val proxyUser = userRepository.findById(feedPostCreateDto.userId)
-            .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
+        val proxyUser = userRepository.getReferenceById(feedPostCreateDto.userId)
 
         val newFeedPost = feedPostMapper.toEntity(proxyUser, feedPostCreateDto)
 
-        val feedPost = feedPostRepository.save(newFeedPost)
+        feedPostRepository.save(newFeedPost)
 
-        redisService.saveFeedPost(feedPostCreateDto.userId, feedPost)
+        // 팔로우하고 있는 userId에 sorted Set들에 게시물을 저장
+        // Reids Hash에 Dto로 변환하여 Redis로 넘겨야 함
+        // Redis는 캐싱 역할만 담당
+        val followers = followRepository.findAllByFollowee(proxyUser)
+        val feedPostListDto = feedPostMapper.toFeedPostListDto(newFeedPost)
+
+        followers.forEach{ follow ->
+            redisService.saveFeedPost(follow.follower!!.id, feedPostListDto)
+        }
     }
 
     @Transactional
@@ -103,6 +99,9 @@ class FeedPostServiceImpl(
         val feedPost = feedPostRepository.findById(feedPostUpdateDto.feedPostId)
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
         feedPost.updateFeedPost(feedPostUpdateDto)
+
+        // 캐싱되어있으면 캐싱되어있는 DTO에 동기화
+        redisService.updateFeed(feedPostUpdateDto)
     }
 
     @Transactional
@@ -112,3 +111,4 @@ class FeedPostServiceImpl(
         feedPost.deleteData()
     }
 }
+
