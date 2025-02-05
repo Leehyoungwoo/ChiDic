@@ -5,6 +5,7 @@ import com.chidicdomain.domain.entity.User
 import com.chidicdomain.dto.CommentDto
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
+import com.chidicdomain.dto.FeedPostListDto
 import org.springframework.stereotype.Component
 
 @Component
@@ -29,6 +30,19 @@ class FeedPostMapperImpl: FeedPostMapper {
                     createdTime = it.createdAt
                 )
             }.toMutableList()
+        )
+    }
+
+    override fun toFeedPostListDto(feedPost: FeedPost): FeedPostListDto {
+        return FeedPostListDto(
+            feedPostId = feedPost.id,
+            title = feedPost.title,
+            content = feedPost.content,
+            writer = feedPost.user.username,
+            writerProfile = feedPost.user.profilePicture,
+            likeCount = feedPost.likeCount,
+            commentCont = feedPost.comments.size.toLong(),
+            createdAt = feedPost.createdAt
         )
     }
 }

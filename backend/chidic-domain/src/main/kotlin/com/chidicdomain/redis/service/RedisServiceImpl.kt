@@ -12,7 +12,7 @@ import java.time.ZoneOffset
 class RedisServiceImpl(
     private val redisTemplate: StringRedisTemplate,
     private val objectMapper: ObjectMapper
-): RedisService {
+) : RedisService {
 
     init {
         objectMapper.registerModule(JavaTimeModule())
@@ -21,13 +21,13 @@ class RedisServiceImpl(
     override fun saveFeedPost(userId: Long, feedPost: FeedPost) {
         val redisKey = getKey(userId)
         val feedPostJson = objectMapper.writeValueAsString(feedPost)
-        val score = feedPost.createdAt.toEpochSecond(ZoneOffset.UTC)
-        redisTemplate.opsForZSet().add(redisKey, feedPostJson, score.toDouble())
+        val score = -feedPost.id.toDouble()
+        redisTemplate.opsForZSet().add(redisKey, feedPostJson, score)
     }
 
     override fun getFeedPosts(userId: Long, start: Long, end: Long): List<FeedPost> {
         val redisKey = getKey(userId)
-        val feedPostsJson = redisTemplate.opsForZSet().range(redisKey, start, end) ?: emptySet()
+        val feedPostsJson = redisTemplate.opsForZSet().reverseRange(redisKey, start, end) ?: emptySet()
         return feedPostsJson.map { json ->
             objectMapper.readValue(json, FeedPost::class.java)
         }
@@ -35,6 +35,18 @@ class RedisServiceImpl(
 
     override fun setExpiration(key: String, duration: Duration) {
         redisTemplate.expire(key, duration)
+    }
+
+    override fun getFeedPostsForUser(userId: Long, lastFeedPostId: Long?, size: Int): List<FeedPost> {
+        val key = getKey(userId)
+        val startIndex = if (lastFeedPostId == null) 0 else
+            redisTemplate.opsForZSet().rank(key, (-lastFeedPostId!!).toString())?.plus(1) ?: 0
+        val endIndex = startIndex + size - 1
+
+        val feedPostsJson = redisTemplate.opsForZSet().range(key, startIndex.toLong(), endIndex.toLong()) ?: emptySet()
+        return feedPostsJson.map { json ->
+            objectMapper.readValue(json, FeedPost::class.java)
+        }
     }
 
     private fun getKey(userId: Long) = "user:feed:$userId"
