@@ -1,12 +1,10 @@
 package com.chidicdomain.domain.service.feedpost
 
 import com.chidiccommon.exception.ExceptionMessage.FEED_POST_NOT_FOUND
-import com.chidiccommon.exception.ExceptionMessage.USER_NOT_FOUND
 import com.chidicdomain.domain.mapper.feedpost.FeedPostMapper
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.FollowRepository
 import com.chidicdomain.domain.repository.UserRepository
-import com.chidicdomain.domain.service.user.UserNotFoundException
 import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
 import com.chidicdomain.dto.FeedPostListDto
@@ -41,16 +39,15 @@ class FeedPostServiceImpl(
             )
 
             // Redis 캐싱
-            postsFromDb.forEach { redisService.saveFeedPost(userId, it) }
+            postsFromDb.forEach {
+                redisService.saveFeedPost(userId, feedPostMapper.toFeedPostListDto(it))
+            }
 
             return postsFromDb.map { feedPostMapper.toFeedPostListDto(it) }
         }
 
-        // Redis에서 가져온 feedPostId 리스트로 DB에서 조회
-        val feedPosts = feedPostRepository.findAllByIdIn(cachedFeedPostIds)
-
         // DTO 변환 후 반환
-        return feedPosts.map { feedPostMapper.toFeedPostListDto(it) }
+        return redisService.getFeedPostsFromHash(cachedFeedPostIds)
     }
 
     override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
@@ -60,17 +57,20 @@ class FeedPostServiceImpl(
 
     @Transactional
     override fun createFeed(feedPostCreateDto: FeedPostCreateDto) {
-        val proxyUser = userRepository.findById(feedPostCreateDto.userId)
-            .orElseThrow { UserNotFoundException(USER_NOT_FOUND.message) }
+        val proxyUser = userRepository.getReferenceById(feedPostCreateDto.userId)
 
         val newFeedPost = feedPostMapper.toEntity(proxyUser, feedPostCreateDto)
 
         feedPostRepository.save(newFeedPost)
 
         // 팔로우하고 있는 userId에 sorted Set들에 게시물을 저장
+        // Reids Hash에 Dto로 변환하여 Redis로 넘겨야 함
+        // Redis는 캐싱 역할만 담당
         val followers = followRepository.findAllByFollowee(proxyUser)
+        val feedPostListDto = feedPostMapper.toFeedPostListDto(newFeedPost)
+
         followers.forEach{ follow ->
-            redisService.saveFeedPost(follow.follower!!.id, newFeedPost)
+            redisService.saveFeedPost(follow.follower!!.id, feedPostListDto)
         }
     }
 

@@ -9,6 +9,6 @@ data class FeedPostListDto(
     val writer: String,
     val writerProfile: String?,
     val likeCount: Int,
-    val commentCont: Long,
+    val commentCount: Long,
     val createdAt: LocalDateTime
 )

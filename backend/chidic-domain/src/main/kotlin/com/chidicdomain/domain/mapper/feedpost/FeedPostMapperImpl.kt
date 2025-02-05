@@ -41,7 +41,7 @@ class FeedPostMapperImpl: FeedPostMapper {
             writer = feedPost.user.username,
             writerProfile = feedPost.user.profilePicture,
             likeCount = feedPost.likeCount,
-            commentCont = feedPost.comments.size.toLong(),
+            commentCount = feedPost.comments.size.toLong(),
             createdAt = feedPost.createdAt
         )
     }
