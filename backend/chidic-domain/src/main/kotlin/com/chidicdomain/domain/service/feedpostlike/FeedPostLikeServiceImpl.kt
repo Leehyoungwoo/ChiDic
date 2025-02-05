@@ -8,6 +8,7 @@ import com.chidicdomain.domain.repository.FeedPostLikeRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.dto.FeedLikeDto
+import com.chidicdomain.redis.service.RedisService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 class FeedPostLikeServiceImpl(
     private val userRepository: UserRepository,
     private val feedPostRepository: FeedPostRepository,
-    private val feedPostLikeRepository: FeedPostLikeRepository
+    private val feedPostLikeRepository: FeedPostLikeRepository,
+    private val redisService: RedisService
 ) : FeedPostLikeService {
 
     override fun getLikeCount(feedPostId: Long): FeedLikeDto {
@@ -36,6 +38,9 @@ class FeedPostLikeServiceImpl(
         val feedPostLike = findOrCreateFeedPostLike(PostLikeId(feedPostId, userId), proxyUser, proxyFeedPost)
 
         feedPostLike.likePost()
+
+        val newLikeCount = feedPostLike.feedPost!!.likeCount
+        redisService.updateLikeCount(feedPostId, newLikeCount)
     }
 
     @Transactional
@@ -43,6 +48,9 @@ class FeedPostLikeServiceImpl(
         val feedPostLike = feedPostLikeRepository.findById(PostLikeId(feedPostId, userId))
 
         feedPostLike.get().unlikePost()
+
+        val newLikeCount = feedPostLike.get().feedPost!!.likeCount
+        redisService.updateLikeCount(feedPostId, newLikeCount)
     }
 
     private fun findOrCreateFeedPostLike(

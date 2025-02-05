@@ -25,10 +25,10 @@ class FeedPostServiceImpl(
     private val redisService: RedisService
 ) : FeedPostService {
     override fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int, start: Long): List<FeedPostListDto> {
-        // Redis에서 feedPostId 리스트 조회
+        // Step 1️⃣: Redis에서 feedPostId 리스트 조회
         val cachedFeedPostIds = redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
 
-        // Redis에서 가져온 ID가 없으면 DB에서 조회 (캐싱 미스)
+        // Step 2️⃣: feedPostId 리스트 자체가 캐시 미스일 경우 → DB에서 가져오기
         if (cachedFeedPostIds.isEmpty()) {
             val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
             val userList = followList.map { it.followee!! }
@@ -38,16 +38,36 @@ class FeedPostServiceImpl(
                 PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
             )
 
-            // Redis 캐싱
+            // Redis에 feedPostId 저장 & 개별 게시글 캐싱
             postsFromDb.forEach {
-                redisService.saveFeedPost(userId, feedPostMapper.toFeedPostListDto(it))
+                val dto = feedPostMapper.toFeedPostListDto(it)
+                redisService.saveFeedPost(userId, dto) // feedPostId 저장
+                redisService.savaFeedPostDtoToHash(dto)   // 개별 게시글 캐싱
             }
 
             return postsFromDb.map { feedPostMapper.toFeedPostListDto(it) }
         }
 
-        // DTO 변환 후 반환
-        return redisService.getFeedPostsFromHash(cachedFeedPostIds)
+        // Step 3️⃣: 개별적으로 Redis에서 feedPostDto 조회 + 캐시 미스 처리
+        val (cachedFeedPosts, missingFeedPostIds) = cachedFeedPostIds
+            .map { it to redisService.getFeedPostFromHash(it) } // 개별 조회
+            .partition { it.second != null } // 캐시 히트/미스 분리
+
+        // Step 4️⃣: Redis에서 가져온 데이터 정리
+        val finalFeedPosts = cachedFeedPosts.map { it.second!! }.toMutableList()
+
+        // Step 5️⃣: 캐시 미스 난 경우, DB에서 조회 후 Redis에 저장
+        if (missingFeedPostIds.isNotEmpty()) {
+            val missingFeedPosts = feedPostRepository.findAllById(missingFeedPostIds.map { it.first })
+
+            missingFeedPosts.forEach { feedPost ->
+                val dto = feedPostMapper.toFeedPostListDto(feedPost)
+                redisService.savaFeedPostDtoToHash(dto) // Redis에 캐싱
+                finalFeedPosts.add(dto)
+            }
+        }
+
+        return finalFeedPosts.sortedByDescending { it.feedPostId }
     }
 
     override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
@@ -79,6 +99,9 @@ class FeedPostServiceImpl(
         val feedPost = feedPostRepository.findById(feedPostUpdateDto.feedPostId)
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
         feedPost.updateFeedPost(feedPostUpdateDto)
+
+        // 캐싱되어있으면 캐싱되어있는 DTO에 동기화
+        redisService.updateFeed(feedPostUpdateDto)
     }
 
     @Transactional

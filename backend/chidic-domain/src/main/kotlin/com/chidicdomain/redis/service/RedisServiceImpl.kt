@@ -2,6 +2,7 @@ package com.chidicdomain.redis.service
 
 import com.chidicdomain.domain.entity.FeedPost
 import com.chidicdomain.dto.FeedPostListDto
+import com.chidicdomain.dto.FeedPostUpdateDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -53,12 +54,51 @@ class RedisServiceImpl(
         return feedPostIds.map { it.toLong() }
     }
 
-    override fun getFeedPostsFromHash(feedPostIds: List<Long>): List<FeedPostListDto> {
-        return feedPostIds.mapNotNull { feedPostId ->
-            val key = getHashKey(feedPostId)
-            val json = redisTemplate.opsForValue().get(key) ?: return@mapNotNull null
+    override fun getFeedPostFromHash(feedPostId: Long): FeedPostListDto? {
+        val key = getHashKey(feedPostId)
+        val json = redisTemplate.opsForValue().get(key)
+
+        return if (json != null) {
+            // TTL 갱신 (LRU 삭제 방지)
+            redisTemplate.expire(key, Duration.ofDays(7))
             objectMapper.readValue(json, FeedPostListDto::class.java)
+        } else {
+            // 캐시 미스 발생
+            null
         }
+    }
+
+    override fun savaFeedPostDtoToHash(feedPostListDto: FeedPostListDto) {
+        val key = getHashKey(feedPostListDto.feedPostId)
+        val json = objectMapper.writeValueAsString(feedPostListDto)
+
+        redisTemplate.opsForValue().set(key, json)
+        setExpiration(key, Duration.ofDays(7))
+    }
+
+    override fun updateLikeCount(feedPostId: Long, newLikeCount: Int) {
+        val key = getHashKey(feedPostId)
+        val json = redisTemplate.opsForValue().get(key) ?: return
+
+        val feedPostListDto = objectMapper.readValue(json, FeedPostListDto::class.java)
+        val updatedFeedPostDto = feedPostListDto.copy(likeCount = newLikeCount)
+
+        val updatedJson = objectMapper.writeValueAsString(updatedFeedPostDto)
+        redisTemplate.opsForValue().set(key, updatedJson)
+    }
+
+    override fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto) {
+        val key = getHashKey(feedPostUpdateDto.feedPostId)
+        val json = redisTemplate.opsForValue().get(key) ?: return
+
+        val feedPostListDto = objectMapper.readValue(json, FeedPostListDto::class.java)
+        val updatedFeedPostDto = feedPostUpdateDto.copy(
+            title = feedPostUpdateDto.title,
+            content = feedPostUpdateDto.content)
+
+        val updatedJson = objectMapper.writeValueAsString(updatedFeedPostDto)
+        redisTemplate.opsForValue().set(key, updatedJson)
+
     }
 
     override fun setExpiration(key: String, duration: Duration) {
@@ -69,11 +109,4 @@ class RedisServiceImpl(
 
     private fun getHashKey(feedPostId: Long) = "feedpost:details:$feedPostId"
 
-    private fun savaFeedPostDtoToHash(feedPostListDto: FeedPostListDto) {
-        val key = getHashKey(feedPostListDto.feedPostId)
-        val json = objectMapper.writeValueAsString(feedPostListDto)
-
-        redisTemplate.opsForValue().set(key, json)
-        setExpiration(key, Duration.ofDays(7))
-    }
 }
