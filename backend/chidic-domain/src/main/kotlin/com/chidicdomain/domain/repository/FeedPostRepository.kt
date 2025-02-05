@@ -21,4 +21,13 @@ interface FeedPostRepository : JpaRepository<FeedPost, Long>{
     fun findByUserIn(userList: List<User>, pageable: Pageable): List<FeedPost>
 
     fun findByUserInAndIdLessThan(userList: List<User>, lastFeedPostId: Long, pageable: Pageable): List<FeedPost>
+
+    @Query("""
+    SELECT f FROM FeedPost f 
+    LEFT JOIN FETCH f.user 
+    LEFT JOIN FETCH f.comments 
+    WHERE f.id IN :ids 
+    ORDER BY f.id DESC
+""")
+    fun findAllByIdIn(@Param("ids") ids: List<Long>): List<FeedPost>
 }

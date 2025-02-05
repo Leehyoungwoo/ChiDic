@@ -20,9 +20,8 @@ class RedisServiceImpl(
 
     override fun saveFeedPost(userId: Long, feedPost: FeedPost) {
         val redisKey = getKey(userId)
-        val feedPostJson = objectMapper.writeValueAsString(feedPost)
         val score = -feedPost.id.toDouble()
-        redisTemplate.opsForZSet().add(redisKey, feedPostJson, score)
+        redisTemplate.opsForZSet().add(redisKey, feedPost.id.toString(), score)
     }
 
     override fun getFeedPosts(userId: Long, start: Long, end: Long): List<FeedPost> {
@@ -37,16 +36,20 @@ class RedisServiceImpl(
         redisTemplate.expire(key, duration)
     }
 
-    override fun getFeedPostsForUser(userId: Long, lastFeedPostId: Long?, size: Int): List<FeedPost> {
+    override fun getFeedPostIdsForUser(userId: Long, lastFeedPostId: Long?, size: Int): List<Long> {
         val key = getKey(userId)
-        val startIndex = if (lastFeedPostId == null) 0 else
-            redisTemplate.opsForZSet().rank(key, (-lastFeedPostId!!).toString())?.plus(1) ?: 0
+
+        // 첫 페이지 조회 시 처음부터 가져오기
+        val startIndex = if (lastFeedPostId == null) 0
+        else (redisTemplate.opsForZSet().rank(key, lastFeedPostId.toString())?.plus(1) ?: 0) // ZSET에서 lastFeedPostId의 위치를 찾고 다음부터 조회
+
         val endIndex = startIndex + size - 1
 
-        val feedPostsJson = redisTemplate.opsForZSet().range(key, startIndex.toLong(), endIndex.toLong()) ?: emptySet()
-        return feedPostsJson.map { json ->
-            objectMapper.readValue(json, FeedPost::class.java)
-        }
+        // Redis에서 feedPostId 리스트 가져오기 (정렬 순서는 저장될 때 PK 내림차순이므로 ZRANGE 사용)
+        val feedPostIds = redisTemplate.opsForZSet()
+            .range(key, startIndex.toLong(), endIndex.toLong()) ?: emptySet()
+
+        return feedPostIds.map { it.toLong() }
     }
 
     private fun getKey(userId: Long) = "user:feed:$userId"

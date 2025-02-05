@@ -27,17 +27,30 @@ class FeedPostServiceImpl(
     private val redisService: RedisService
 ) : FeedPostService {
     override fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int, start: Long): List<FeedPostListDto> {
-        val cachedFeedPost = redisService.getFeedPostsForUser(userId, lastFeedPostId, size)
+        // Redis에서 feedPostId 리스트 조회
+        val cachedFeedPostIds = redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
 
-        if (cachedFeedPost.isEmpty()) {
+        // Redis에서 가져온 ID가 없으면 DB에서 조회 (캐싱 미스)
+        if (cachedFeedPostIds.isEmpty()) {
             val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
             val userList = followList.map { it.followee!! }
-            val postsFromDb = feedPostRepository.findByUserIn(userList, PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id")))
+
+            val postsFromDb = feedPostRepository.findByUserIn(
+                userList,
+                PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
+            )
+
+            // Redis 캐싱
             postsFromDb.forEach { redisService.saveFeedPost(userId, it) }
+
             return postsFromDb.map { feedPostMapper.toFeedPostListDto(it) }
         }
 
-        return cachedFeedPost.map { feedPostMapper.toFeedPostListDto(it) }
+        // Redis에서 가져온 feedPostId 리스트로 DB에서 조회
+        val feedPosts = feedPostRepository.findAllByIdIn(cachedFeedPostIds)
+
+        // DTO 변환 후 반환
+        return feedPosts.map { feedPostMapper.toFeedPostListDto(it) }
     }
 
     override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
