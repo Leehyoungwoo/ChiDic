@@ -72,6 +72,7 @@ class FeedPostServiceImpl(
 
     override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
         val feedPost = feedPostRepository.findFeedPostWithUserAndComments(feedPostId)
+            ?: throw FeedPostNotFoundException(FEED_POST_NOT_FOUND.message)
         return feedPostMapper.toFeedPostDetailDto(feedPost)
     }
 
@@ -100,7 +101,6 @@ class FeedPostServiceImpl(
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
         feedPost.updateFeedPost(feedPostUpdateDto)
 
-        // 캐싱되어있으면 캐싱되어있는 DTO에 동기화
         redisService.updateFeed(feedPostUpdateDto)
     }
 

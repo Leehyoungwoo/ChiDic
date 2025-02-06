@@ -29,6 +29,7 @@ class FeedPostLikeServiceImpl(
             likeCount = postLikes.size.toLong()
         )
     }
+
     @Transactional
     override fun likeFeedPost(userId: Long, feedPostId: Long) {
         val proxyUser = userRepository.getReferenceById(userId)

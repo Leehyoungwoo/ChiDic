@@ -79,9 +79,11 @@ class FeedPostController(
 object FeedPostMapper {
     fun dtoToFeedPostDetailResponse(feedPostDetailDto: FeedPostDetailDto): FeedPostDetailResponse {
         return FeedPostDetailResponse(
+            username = feedPostDetailDto.username,
             title = feedPostDetailDto.title,
             content = feedPostDetailDto.content,
             comments = feedPostDetailDto.comments,
+            likeCount = feedPostDetailDto.likeCount,
             created = feedPostDetailDto.created
         )
     }
