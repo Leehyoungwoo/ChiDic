@@ -42,7 +42,6 @@ class FeedPostServiceImpl(
             postsFromDb.forEach {
                 val dto = feedPostMapper.toFeedPostListDto(it)
                 redisService.saveFeedPost(userId, dto) // feedPostId 저장
-                redisService.savaFeedPostDtoToHash(dto)   // 개별 게시글 캐싱
             }
 
             return postsFromDb.map { feedPostMapper.toFeedPostListDto(it) }
@@ -66,6 +65,9 @@ class FeedPostServiceImpl(
                 finalFeedPosts.add(dto)
             }
         }
+
+        // 읽은 피드는 읽음 처리(제거)
+        redisService.markReadAsFeed(userId, cachedFeedPostIds)
 
         return finalFeedPosts.sortedByDescending { it.feedPostId }
     }

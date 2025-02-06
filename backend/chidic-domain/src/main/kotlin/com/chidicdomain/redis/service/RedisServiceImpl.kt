@@ -22,10 +22,18 @@ class RedisServiceImpl(
 
     override fun saveFeedPost(userId: Long, feedPostListDto: FeedPostListDto) {
         val redisKey = getKey(userId)
-        val score = -feedPostListDto.feedPostId.toDouble()
+        val score = System.currentTimeMillis().toDouble()
         redisTemplate.opsForZSet().add(redisKey, feedPostListDto.feedPostId.toString(), score)
 
         savaFeedPostDtoToHash(feedPostListDto)
+
+        val maxSize = 1000L
+        val currentSize = redisTemplate.opsForZSet().size(redisKey) ?: 0L
+        if (currentSize > maxSize) {
+            // 오래된 데이터를 삭제 (앞쪽 인덱스에서 제거)
+            val removeCount = currentSize - maxSize
+            redisTemplate.opsForZSet().removeRange(redisKey, 0, removeCount - 1)
+        }
     }
 
     override fun getFeedPosts(userId: Long, start: Long, end: Long): List<FeedPost> {
@@ -42,14 +50,14 @@ class RedisServiceImpl(
 
         // 첫 페이지 조회 시 처음부터 가져오기
         val startIndex = if (lastFeedPostId == null) 0
-        else (redisTemplate.opsForZSet().rank(key, lastFeedPostId.toString())?.plus(1)
-            ?: 0) // ZSET에서 lastFeedPostId의 위치를 찾고 다음부터 조회
+        else (redisTemplate.opsForZSet().reverseRank(key, lastFeedPostId.toString())?.plus(1) ?: 0)
+        // ZSET에서 lastFeedPostId의 위치를 찾고 다음부터 조회
 
         val endIndex = startIndex + size - 1
 
         // Redis에서 feedPostId 리스트 가져오기 (정렬 순서는 저장될 때 PK 내림차순이므로 ZRANGE 사용)
         val feedPostIds = redisTemplate.opsForZSet()
-            .range(key, startIndex, endIndex) ?: emptySet()
+            .reverseRange(key, startIndex, endIndex) ?: emptySet()
 
         return feedPostIds.map { it.toLong() }
     }
@@ -94,11 +102,17 @@ class RedisServiceImpl(
         val feedPostListDto = objectMapper.readValue(json, FeedPostListDto::class.java)
         val updatedFeedPostDto = feedPostUpdateDto.copy(
             title = feedPostUpdateDto.title,
-            content = feedPostUpdateDto.content)
+            content = feedPostUpdateDto.content
+        )
 
         val updatedJson = objectMapper.writeValueAsString(updatedFeedPostDto)
         redisTemplate.opsForValue().set(key, updatedJson)
 
+    }
+
+    override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
+        val key = getKey(userId)
+        redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
     }
 
     override fun setExpiration(key: String, duration: Duration) {
