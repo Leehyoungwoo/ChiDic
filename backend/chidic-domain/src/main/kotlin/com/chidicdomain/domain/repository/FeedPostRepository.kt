@@ -13,10 +13,10 @@ import org.springframework.stereotype.Repository
 interface FeedPostRepository : JpaRepository<FeedPost, Long>{
     @Query("SELECT fp FROM FeedPost fp " +
             "JOIN FETCH fp.user " +
-            "JOIN FETCH fp.comments c " +
-            "JOIN FETCH c.user " +
+            "LEFT JOIN FETCH fp.comments c " +
+            "LEFT JOIN FETCH c.user " +
             "WHERE fp.id = :id")
-    fun findFeedPostWithUserAndComments(@Param("id") id: Long): FeedPost
+    fun findFeedPostWithUserAndComments(@Param("id") id: Long): FeedPost?
 
     fun findByUserIn(userList: List<User>, pageable: Pageable): List<FeedPost>
 

@@ -20,9 +20,11 @@ class FeedPostMapperImpl: FeedPostMapper {
 
     override fun toFeedPostDetailDto(feedPost: FeedPost): FeedPostDetailDto {
         return FeedPostDetailDto(
+            username = feedPost.user.username,
             title = feedPost.title,
             content = feedPost.content,
             created = feedPost.createdAt,
+            likeCount = feedPost.likeCount,
             comments = feedPost.comments.map {
                 CommentDto(
                     userId = it.user.username,

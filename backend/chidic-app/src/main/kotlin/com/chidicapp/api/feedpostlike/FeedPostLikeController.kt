@@ -3,6 +3,7 @@ package com.chidicapp.api.feedpostlike
 import com.chidicapp.api.response.FeedLikeResponse
 import com.chidicapp.security.auth.model.OAuth2UserDetails
 import com.chidicdomain.domain.service.feedpostlike.FeedPostLikeService
+import com.chidicdomain.domain.service.feedpostlike.LockLikeService
 import com.chidicdomain.dto.FeedLikeDto
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/feedposts/{feedPostId}/like")
 class FeedPostLikeController(
-    private val feedPostLikeService: FeedPostLikeService
+    private val feedPostLikeService: FeedPostLikeService,
+    private val lockLikeService: LockLikeService
 ) {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -29,7 +31,7 @@ class FeedPostLikeController(
         @PathVariable feedPostId: Long
     ) {
         val userId = principal.getId()
-        feedPostLikeService.likeFeedPost(userId, feedPostId)
+        lockLikeService.namedLockLike(userId, feedPostId)
     }
 
     // 내가 좋아요 했는 여부 만들어야함
@@ -40,7 +42,7 @@ class FeedPostLikeController(
         @PathVariable feedPostId: Long
     ) {
         val userId = principal.getId()
-        feedPostLikeService.unlikeFeedPost(userId, feedPostId)
+        lockLikeService.namedLockUnlike(userId, feedPostId)
     }
 }
 

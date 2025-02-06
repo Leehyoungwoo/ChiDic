@@ -8,6 +8,9 @@ import com.chidicdomain.domain.repository.FeedPostLikeRepository
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.UserRepository
 import com.chidicdomain.dto.FeedLikeDto
+import com.chidicdomain.kafka.event.LikeEvent
+import com.chidicdomain.kafka.event.UnlikeEvent
+import com.chidicdomain.kafka.producer.FeedKafkaProducer
 import com.chidicdomain.redis.service.RedisService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,7 +21,8 @@ class FeedPostLikeServiceImpl(
     private val userRepository: UserRepository,
     private val feedPostRepository: FeedPostRepository,
     private val feedPostLikeRepository: FeedPostLikeRepository,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    private val feedKafkaProducer: FeedKafkaProducer
 ) : FeedPostLikeService {
 
     override fun getLikeCount(feedPostId: Long): FeedLikeDto {
@@ -29,6 +33,7 @@ class FeedPostLikeServiceImpl(
             likeCount = postLikes.size.toLong()
         )
     }
+
     @Transactional
     override fun likeFeedPost(userId: Long, feedPostId: Long) {
         val proxyUser = userRepository.getReferenceById(userId)
@@ -40,7 +45,10 @@ class FeedPostLikeServiceImpl(
         feedPostLike.likePost()
 
         val newLikeCount = feedPostLike.feedPost!!.likeCount
-        redisService.updateLikeCount(feedPostId, newLikeCount)
+        feedKafkaProducer.sendFeedLikedEvent(LikeEvent(
+            feedPostId = feedPostId,
+            likeCount = newLikeCount
+        ))
     }
 
     @Transactional
@@ -50,7 +58,10 @@ class FeedPostLikeServiceImpl(
         feedPostLike.get().unlikePost()
 
         val newLikeCount = feedPostLike.get().feedPost!!.likeCount
-        redisService.updateLikeCount(feedPostId, newLikeCount)
+        feedKafkaProducer.sendFeedUnlikedEvent(UnlikeEvent(
+            feedPostId = feedPostId,
+            likeCount = newLikeCount
+        ))
     }
 
     private fun findOrCreateFeedPostLike(
