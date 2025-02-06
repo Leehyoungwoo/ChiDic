@@ -61,7 +61,6 @@ class RedisServiceImpl(
 
         val res = feedPostIds.map { it.toLong() }
 
-        markReadAsFeed(userId, res)
         return res
     }
 
@@ -112,7 +111,7 @@ class RedisServiceImpl(
         redisTemplate.opsForValue().set(key, updatedJson)
     }
 
-    fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
+    override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
         val key = getKey(userId)
         redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
     }

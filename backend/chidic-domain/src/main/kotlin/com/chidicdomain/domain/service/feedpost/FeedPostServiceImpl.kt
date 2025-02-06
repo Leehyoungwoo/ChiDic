@@ -77,6 +77,10 @@ class FeedPostServiceImpl(
             }
         }
 
+        if (cachedFeedPosts.isNotEmpty()) {
+            redisService.markReadAsFeed(userId, cachedFeedPostIds)
+        }
+
         return finalFeedPosts.sortedByDescending { it.feedPostId }
     }
 
