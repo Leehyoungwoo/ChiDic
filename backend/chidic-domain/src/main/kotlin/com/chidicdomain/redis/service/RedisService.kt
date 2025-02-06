@@ -14,5 +14,4 @@ interface RedisService {
     fun savaFeedPostDtoToHash(feedPostListDto: FeedPostListDto)
     fun updateLikeCount(feedPostId: Long, newLikeCount: Int)
     fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto)
-    fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>)
 }

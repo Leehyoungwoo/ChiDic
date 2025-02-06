@@ -59,7 +59,10 @@ class RedisServiceImpl(
         val feedPostIds = redisTemplate.opsForZSet()
             .reverseRange(key, startIndex, endIndex) ?: emptySet()
 
-        return feedPostIds.map { it.toLong() }
+        val res = feedPostIds.map { it.toLong() }
+
+        markReadAsFeed(userId, res)
+        return res
     }
 
     override fun getFeedPostFromHash(feedPostId: Long): FeedPostListDto? {
@@ -107,10 +110,9 @@ class RedisServiceImpl(
 
         val updatedJson = objectMapper.writeValueAsString(updatedFeedPostDto)
         redisTemplate.opsForValue().set(key, updatedJson)
-
     }
 
-    override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
+    fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
         val key = getKey(userId)
         redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
     }

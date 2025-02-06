@@ -9,6 +9,8 @@ import com.chidicdomain.dto.FeedPostCreateDto
 import com.chidicdomain.dto.FeedPostDetailDto
 import com.chidicdomain.dto.FeedPostListDto
 import com.chidicdomain.dto.FeedPostUpdateDto
+import com.chidicdomain.kafka.event.FeedCreatedEvent
+import com.chidicdomain.kafka.producer.FeedKafkaProducer
 import com.chidicdomain.redis.service.RedisService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -22,9 +24,15 @@ class FeedPostServiceImpl(
     private val feedPostRepository: FeedPostRepository,
     private val feedPostMapper: FeedPostMapper,
     private val followRepository: FollowRepository,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    private val feedKafkaProducer: FeedKafkaProducer
 ) : FeedPostService {
-    override fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int, start: Long): List<FeedPostListDto> {
+    override fun getFollowedUsersFeed(
+        userId: Long,
+        lastFeedPostId: Long?,
+        size: Int,
+        start: Long
+    ): List<FeedPostListDto> {
         // Step 1️⃣: Redis에서 feedPostId 리스트 조회
         val cachedFeedPostIds = redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
 
@@ -41,7 +49,10 @@ class FeedPostServiceImpl(
             // Redis에 feedPostId 저장 & 개별 게시글 캐싱
             postsFromDb.forEach {
                 val dto = feedPostMapper.toFeedPostListDto(it)
-                redisService.saveFeedPost(userId, dto) // feedPostId 저장
+                feedKafkaProducer.sendFeedCreatedEvent(FeedCreatedEvent(
+                    userIds = userList.map { it.id }.toList(),
+                    feedPostListDto = dto
+                ))
             }
 
             return postsFromDb.map { feedPostMapper.toFeedPostListDto(it) }
@@ -61,13 +72,10 @@ class FeedPostServiceImpl(
 
             missingFeedPosts.forEach { feedPost ->
                 val dto = feedPostMapper.toFeedPostListDto(feedPost)
-                redisService.savaFeedPostDtoToHash(dto) // Redis에 캐싱
+                feedKafkaProducer.sendFeedCacheUpdateEvent(dto)
                 finalFeedPosts.add(dto)
             }
         }
-
-        // 읽은 피드는 읽음 처리(제거)
-        redisService.markReadAsFeed(userId, cachedFeedPostIds)
 
         return finalFeedPosts.sortedByDescending { it.feedPostId }
     }
@@ -92,9 +100,15 @@ class FeedPostServiceImpl(
         val followers = followRepository.findAllByFollowee(proxyUser)
         val feedPostListDto = feedPostMapper.toFeedPostListDto(newFeedPost)
 
-        followers.forEach{ follow ->
-            redisService.saveFeedPost(follow.follower!!.id, feedPostListDto)
+        followers.forEach { follow ->
+
         }
+        feedKafkaProducer.sendFeedCreatedEvent(
+            FeedCreatedEvent(
+                userIds = followers.map { it.follower!!.id },
+                feedPostListDto = feedPostListDto
+            )
+        )
     }
 
     @Transactional
@@ -103,7 +117,7 @@ class FeedPostServiceImpl(
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
         feedPost.updateFeedPost(feedPostUpdateDto)
 
-        redisService.updateFeed(feedPostUpdateDto)
+        feedKafkaProducer.sendFeedUpdatedEvent(feedPostUpdateDto)
     }
 
     @Transactional

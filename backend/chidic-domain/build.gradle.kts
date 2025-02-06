@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
 	implementation(project(":chidic-common"))
+	api("org.springframework.kafka:spring-kafka")
 	api("org.springframework.boot:spring-boot-starter-data-jpa")
 	api("org.jetbrains.kotlin:kotlin-reflect")
 
