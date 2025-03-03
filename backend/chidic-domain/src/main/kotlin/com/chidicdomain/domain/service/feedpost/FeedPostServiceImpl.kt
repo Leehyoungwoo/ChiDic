@@ -33,51 +33,19 @@ class FeedPostServiceImpl(
         size: Int,
         start: Long
     ): List<FeedPostListDto> {
-        // Step 1️⃣: Redis에서 feedPostId 리스트 조회
+        // Redis에서 feedPostId 리스트 조회
         val cachedFeedPostIds = redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
 
-        // Step 2️⃣: feedPostId 리스트 자체가 캐시 미스일 경우 → DB에서 가져오기
+        // 캐시 미스일 경우 DB에서 조회
         if (cachedFeedPostIds.isEmpty()) {
-            val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
-            val userList = followList.map { it.followee!! }
-
-            val postsFromDb = feedPostRepository.findByUserIn(
-                userList,
-                PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
-            )
-
-            // Redis에 feedPostId 저장 & 개별 게시글 캐싱
-            postsFromDb.forEach {
-                val dto = feedPostMapper.toFeedPostListDto(it)
-                feedKafkaProducer.sendFeedCreatedEvent(FeedCreatedEvent(
-                    userIds = userList.map { it.id }.toList(),
-                    feedPostListDto = dto
-                ))
-            }
-
-            return postsFromDb.map { feedPostMapper.toFeedPostListDto(it) }
+            return fetchAndCacheFeedFromDB(userId, size)
         }
 
-        // Step 3️⃣: 개별적으로 Redis에서 feedPostDto 조회 + 캐시 미스 처리
-        val (cachedFeedPosts, missingFeedPostIds) = cachedFeedPostIds
-            .map { it to redisService.getFeedPostFromHash(it) } // 개별 조회
-            .partition { it.second != null } // 캐시 히트/미스 분리
+        // Redis에서 개별 feedPost 조회 & 캐시 미스 처리
+        val finalFeedPosts = getFeedPostsFromCacheOrDB(cachedFeedPostIds)
 
-        // Step 4️⃣: Redis에서 가져온 데이터 정리
-        val finalFeedPosts = cachedFeedPosts.map { it.second!! }.toMutableList()
-
-        // Step 5️⃣: 캐시 미스 난 경우, DB에서 조회 후 Redis에 저장
-        if (missingFeedPostIds.isNotEmpty()) {
-            val missingFeedPosts = feedPostRepository.findAllById(missingFeedPostIds.map { it.first })
-
-            missingFeedPosts.forEach { feedPost ->
-                val dto = feedPostMapper.toFeedPostListDto(feedPost)
-                feedKafkaProducer.sendFeedCacheUpdateEvent(dto)
-                finalFeedPosts.add(dto)
-            }
-        }
-
-        if (cachedFeedPosts.isNotEmpty()) {
+        // 읽음 처리 (Redis 업데이트)
+        if (finalFeedPosts.isNotEmpty()) {
             redisService.markReadAsFeed(userId, cachedFeedPostIds)
         }
 
@@ -104,9 +72,6 @@ class FeedPostServiceImpl(
         val followers = followRepository.findAllByFollowee(proxyUser)
         val feedPostListDto = feedPostMapper.toFeedPostListDto(newFeedPost)
 
-        followers.forEach { follow ->
-
-        }
         feedKafkaProducer.sendFeedCreatedEvent(
             FeedCreatedEvent(
                 userIds = followers.map { it.follower!!.id },
@@ -129,6 +94,52 @@ class FeedPostServiceImpl(
         val feedPost = feedPostRepository.findById(feedPostId)
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
         feedPost.deleteData()
+    }
+
+    /**
+     *  캐시 미스 시 DB에서 데이터를 가져와 Redis에 캐싱
+     */
+    private fun fetchAndCacheFeedFromDB(userId: Long, size: Int): List<FeedPostListDto> {
+        val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
+        val userList = followList.mapNotNull { it.followee }
+
+        val postsFromDb = feedPostRepository.findByUserIn(
+            userList,
+            PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
+        )
+
+        return postsFromDb.map { post ->
+            val dto = feedPostMapper.toFeedPostListDto(post)
+            feedKafkaProducer.sendFeedCreatedEvent(FeedCreatedEvent(
+                userIds = userList.map { it.id },
+                feedPostListDto = dto
+            ))
+            dto
+        }
+    }
+
+    /**
+     *  Redis에서 개별 게시글 조회 & 캐시 미스 처리
+     */
+    private fun getFeedPostsFromCacheOrDB(cachedFeedPostIds: List<Long>): List<FeedPostListDto> {
+        val (cachedFeedPosts, missingFeedPostIds) = cachedFeedPostIds
+            .map { it to redisService.getFeedPostFromHash(it) } // Redis 개별 조회
+            .partition { it.second != null } // 캐시 히트/미스 분리
+
+        val finalFeedPosts = cachedFeedPosts.mapNotNull { it.second }.toMutableList()
+
+        // 캐시 미스 발생 시 DB에서 조회
+        if (missingFeedPostIds.isNotEmpty()) {
+            val missingFeedPosts = feedPostRepository.findAllById(missingFeedPostIds.map { it.first })
+
+            missingFeedPosts.forEach { feedPost ->
+                val dto = feedPostMapper.toFeedPostListDto(feedPost)
+                feedKafkaProducer.sendFeedCacheUpdateEvent(dto)
+                finalFeedPosts.add(dto)
+            }
+        }
+
+        return finalFeedPosts
     }
 }
 
