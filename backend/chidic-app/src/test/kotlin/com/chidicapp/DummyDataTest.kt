@@ -40,7 +40,7 @@ class DummyDataTest {
     @Test
     fun `사용자 1이 모든 다른 사용자 팔로우하기`() {
         val authHeader =
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdXRob3JpdGllcyI6IlJPTEVfVVNFUiIsImlkIjoxLCJyb2xlIjoiVVNFUiIsImV4cCI6MTc0MDMwODM1MX0.98liRzzMjI78FSPR9gjL4-HT17ncFswmkLjbXLAI9IM"
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdXRob3JpdGllcyI6IlJPTEVfVVNFUiIsImlkIjoxLCJyb2xlIjoiVVNFUiIsImV4cCI6MTc0MjgwMDM1Nn0.NEUajiDTsPpfADTdCMGhk5e_ZFWo7K_Sz2YOA55LgbI"
 
         for (userId in 2..1001) {
             // 팔로우 API URL
