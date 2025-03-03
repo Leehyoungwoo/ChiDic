@@ -15,4 +15,5 @@ interface RedisService {
     fun updateLikeCount(feedPostId: Long, newLikeCount: Int)
     fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto)
     fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>)
+    fun getReadMarkList(userId: Long): List<Long>
 }

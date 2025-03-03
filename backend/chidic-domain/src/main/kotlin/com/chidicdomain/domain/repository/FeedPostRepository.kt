@@ -18,6 +18,9 @@ interface FeedPostRepository : JpaRepository<FeedPost, Long>{
             "WHERE fp.id = :id")
     fun findFeedPostWithUserAndComments(@Param("id") id: Long): FeedPost?
 
+    @Query("SELECT p FROM FeedPost p WHERE p.user IN :users AND p.id NOT IN :readPostIds ORDER BY p.id DESC")
+    fun findUnreadFeedPosts(users: List<User>, readPostIds: List<Long>, pageable: Pageable): List<FeedPost>
+
     fun findByUserIn(userList: List<User>, pageable: Pageable): List<FeedPost>
 
     fun findByUserInAndIdLessThan(userList: List<User>, lastFeedPostId: Long, pageable: Pageable): List<FeedPost>

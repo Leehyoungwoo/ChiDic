@@ -112,8 +112,17 @@ class RedisServiceImpl(
     }
 
     override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
+        val readKey = getReadMarkKey(userId)
+        redisTemplate.opsForSet().add(readKey, *readFeedPostIds.map{ it.toString() }.toTypedArray())
+        redisTemplate.expire(readKey, Duration.ofDays(7)) // 7일 후 자동 삭제
+
         val key = getKey(userId)
         redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
+    }
+
+    override fun getReadMarkList(userId: Long): List<Long> {
+        val readKey = getReadMarkKey(userId)
+        return redisTemplate.opsForSet().members(readKey)!!.map { it.toLong() }
     }
 
     override fun setExpiration(key: String, duration: Duration) {
@@ -124,4 +133,5 @@ class RedisServiceImpl(
 
     private fun getHashKey(feedPostId: Long) = "feedpost:details:$feedPostId"
 
+    private fun getReadMarkKey(userId: Long) = "read:feed:$userId"
 }

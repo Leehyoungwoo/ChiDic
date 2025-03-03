@@ -100,13 +100,19 @@ class FeedPostServiceImpl(
      *  캐시 미스 시 DB에서 데이터를 가져와 Redis에 캐싱
      */
     private fun fetchAndCacheFeedFromDB(userId: Long, size: Int): List<FeedPostListDto> {
+        val readFeedPostIds = redisService.getReadMarkList(userId)
+
         val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
         val userList = followList.mapNotNull { it.followee }
 
-        val postsFromDb = feedPostRepository.findByUserIn(
+        val postsFromDb = feedPostRepository.findUnreadFeedPosts(
             userList,
+            readFeedPostIds.map { it.toLong() },
             PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
         )
+
+        // 디비에서 가져온 피드도 읽음 처리
+        redisService.markReadAsFeed(userId, postsFromDb.map { it.id })
 
         return postsFromDb.map { post ->
             val dto = feedPostMapper.toFeedPostListDto(post)
