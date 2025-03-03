@@ -114,7 +114,7 @@ class RedisServiceImpl(
     override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
         val readKey = getReadMarkKey(userId)
         redisTemplate.opsForSet().add(readKey, *readFeedPostIds.map{ it.toString() }.toTypedArray())
-        redisTemplate.expire(readKey, Duration.ofDays(7)) // 7일 후 자동 삭제
+        redisTemplate.expire(readKey, Duration.ofDays(14)) // 14일 후 자동 삭제
 
         val key = getKey(userId)
         redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
