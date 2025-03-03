@@ -21,14 +21,14 @@ class FeedKafkaProducer(
     }
 
     fun sendFeedLikedEvent(event: LikeEvent) {
-        kafkaTemplate.send("feed-events", event)
+        kafkaTemplate.send("feed-like-events", event)
     }
 
     fun sendFeedUnlikedEvent(event: UnlikeEvent) {
-        kafkaTemplate.send("feed-events", event)
+        kafkaTemplate.send("feed-unlike-events", event)
     }
 
     fun sendFeedCacheUpdateEvent(event: FeedPostListDto) {
-        kafkaTemplate.send("feed-events", event)
+        kafkaTemplate.send("feed-update-events", event)
     }
 }
