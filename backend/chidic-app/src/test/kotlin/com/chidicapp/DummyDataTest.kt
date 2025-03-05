@@ -61,7 +61,7 @@ class DummyDataTest {
 
     @Test
     fun `모든 유저 100개의 글 작성`() {
-        for (userId in 2..10) {
+        for (userId in 2..1001) {
             val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
                 "http://localhost:8080/api/make-access-token/$userId",
                 HttpMethod.POST,
@@ -269,6 +269,60 @@ class DummyDataTest {
                     } else {
                         println("User $userId - Post $postId 실패: ${response.statusCode}")
                     }
+                }
+            }
+        }
+    }
+
+    // 핫키 테스트
+    @Test
+    fun `사용자 10000개 데이터베이스에 넣기`() {
+        for (i in 1002..20000) {
+            val user = User(
+                id = 0L,
+                username = "$i",
+                email = "$i@example.com",
+                profilePicture = null,
+                role = Role.USER,
+                provider = Provider.KAKAO
+            )
+
+            // 유저 데이터 저장
+            userRepository.save(user)
+        }
+    }
+    @Test
+    fun `모든 유저가 게시물 1번에 좋아요`() {
+        for (userId in 1..20000) {
+            // 유저별로 액세스 토큰을 받기 위한 요청
+            val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
+                "http://localhost:8080/api/make-access-token/$userId",
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String::class.java
+            )
+            val token = tokenResponse.body
+            if (token != null) {
+                // 게시물 1번에 좋아요 요청을 위한 헤더 설정
+                val headers = HttpHeaders().apply {
+                    set("Authorization", "Bearer $token")
+                    contentType = MediaType.APPLICATION_JSON
+                }
+                val entity = HttpEntity(null, headers)
+
+                // 게시물 1번에 좋아요 요청 보내기
+                val response: ResponseEntity<Void> = testRestTemplate.exchange(
+                    "http://localhost:8080/api/feedposts/3/like",
+                    HttpMethod.POST,
+                    entity,
+                    Void::class.java
+                )
+
+                // 요청 결과 확인
+                if (response.statusCode.is2xxSuccessful) {
+                    println("User $userId - 게시물 1번 좋아요 성공")
+                } else {
+                    println("User $userId - 게시물 1번 좋아요 실패: ${response.statusCode}")
                 }
             }
         }

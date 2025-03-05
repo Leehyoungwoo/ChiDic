@@ -1,6 +1,7 @@
 package com.chidicdomain.domain.service.feedpost
 
 import com.chidiccommon.exception.ExceptionMessage.FEED_POST_NOT_FOUND
+import com.chidicdomain.domain.localCashe.LocalCacheService
 import com.chidicdomain.domain.mapper.feedpost.FeedPostMapper
 import com.chidicdomain.domain.repository.FeedPostRepository
 import com.chidicdomain.domain.repository.FollowRepository
@@ -25,8 +26,11 @@ class FeedPostServiceImpl(
     private val feedPostMapper: FeedPostMapper,
     private val followRepository: FollowRepository,
     private val redisService: RedisService,
-    private val feedKafkaProducer: FeedKafkaProducer
+    private val feedKafkaProducer: FeedKafkaProducer,
+    private val localCacheService: LocalCacheService
 ) : FeedPostService {
+    private val hotKeyThreshold = 500
+
     override fun getFollowedUsersFeed(
         userId: Long,
         lastFeedPostId: Long?,
@@ -128,20 +132,30 @@ class FeedPostServiceImpl(
      *  Redis에서 개별 게시글 조회 & 캐시 미스 처리
      */
     private fun getFeedPostsFromCacheOrDB(cachedFeedPostIds: List<Long>): List<FeedPostListDto> {
+        // 캐시 히트/미스 분리
         val (cachedFeedPosts, missingFeedPostIds) = cachedFeedPostIds
-            .map { it to redisService.getFeedPostFromHash(it) } // Redis 개별 조회
+            .map { it to (localCacheService.getCache(it.toString()) as? FeedPostListDto ?: redisService.getFeedPostFromHash(it)) } // 로컬 캐시 먼저 확인 후 Redis 조회
             .partition { it.second != null } // 캐시 히트/미스 분리
 
+        // 캐시에서 히트한 게시글 처리
         val finalFeedPosts = cachedFeedPosts.mapNotNull { it.second }.toMutableList()
 
         // 캐시 미스 발생 시 DB에서 조회
         if (missingFeedPostIds.isNotEmpty()) {
-            val missingFeedPosts = feedPostRepository.findAllById(missingFeedPostIds.map { it.first })
+            val missingFeedPosts = feedPostRepository.findAllById(missingFeedPostIds.map { it.first }) // id 리스트 사용
 
             missingFeedPosts.forEach { feedPost ->
                 val dto = feedPostMapper.toFeedPostListDto(feedPost)
                 feedKafkaProducer.sendFeedCacheUpdateEvent(dto)
-                finalFeedPosts.add(dto)
+
+                // 핫키 판별
+                if (feedPost.likeCount >= hotKeyThreshold) {
+                    println("핫키 확인")
+                    localCacheService.putCache(feedPost.id.toString(), dto) // 핫키는 로컬 캐시에 저장
+                    println("핫키 확인" + localCacheService.getCache(feedPost.id.toString()))
+                }
+
+                finalFeedPosts.add(dto) // 최종 리스트에 추가
             }
         }
 
