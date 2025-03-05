@@ -1,9 +1,20 @@
 package com.chidicdomain.kafka.config
 
+import com.chidicdomain.dto.FeedPostUpdateDto
+import com.chidicdomain.kafka.event.FeedCreatedEvent
+import com.chidicdomain.kafka.event.LikeEvent
+import com.chidicdomain.kafka.event.UnlikeEvent
 import org.apache.kafka.clients.admin.NewTopic
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.TopicBuilder
+import org.springframework.kafka.core.ConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.listener.MessageListener
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+import org.springframework.kafka.support.serializer.JsonDeserializer
 
 @Configuration
 class KafkaConfig {
@@ -26,5 +37,28 @@ class KafkaConfig {
     @Bean
     fun feedUpdateEventsTopic(): NewTopic {
         return TopicBuilder.name("feed-update-events").partitions(3).replicas(1).build()
+    }
+
+    @Bean
+    fun eventTopics(): Map<String, Class<out Any>> {
+        return mapOf(
+            "feed-events" to FeedCreatedEvent::class.java,
+            "feed-like-events" to LikeEvent::class.java,
+            "feed-unlike-events" to UnlikeEvent::class.java,
+            "feed-update-events" to FeedPostUpdateDto::class.java
+        )
+    }
+
+    @Bean
+    fun consumerFactory(): ConsumerFactory<String, Any> {
+        val jsonDeserializer = JsonDeserializer(Any::class.java)
+        jsonDeserializer.addTrustedPackages("com.chidicdomain.kafka.event")
+        jsonDeserializer.setUseTypeHeaders(false)
+
+        return DefaultKafkaConsumerFactory(
+            mapOf(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "localhost:9092"),
+            StringDeserializer(),
+            ErrorHandlingDeserializer(jsonDeserializer)
+        )
     }
 }

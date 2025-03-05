@@ -8,7 +8,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
-import java.time.ZoneOffset
 
 @Service
 class RedisServiceImpl(
@@ -20,72 +19,77 @@ class RedisServiceImpl(
         objectMapper.registerModule(JavaTimeModule())
     }
 
+    /**
+     * 뉴스 피드 저장
+     */
     override fun saveFeedPost(userId: Long, feedPostListDto: FeedPostListDto) {
         val redisKey = getKey(userId)
         val score = System.currentTimeMillis().toDouble()
+
         redisTemplate.opsForZSet().add(redisKey, feedPostListDto.feedPostId.toString(), score)
+        saveFeedPostDtoToHash(feedPostListDto)
 
-        savaFeedPostDtoToHash(feedPostListDto)
-
+        // ZSET 크기 제한 (1000개 유지)
         val maxSize = 1000L
         val currentSize = redisTemplate.opsForZSet().size(redisKey) ?: 0L
         if (currentSize > maxSize) {
-            // 오래된 데이터를 삭제 (앞쪽 인덱스에서 제거)
             val removeCount = currentSize - maxSize
             redisTemplate.opsForZSet().removeRange(redisKey, 0, removeCount - 1)
         }
     }
 
+    /**
+     * 뉴스 피드 조회
+     */
     override fun getFeedPosts(userId: Long, start: Long, end: Long): List<FeedPost> {
         val redisKey = getKey(userId)
         val feedPostsJson = redisTemplate.opsForZSet().reverseRange(redisKey, start, end) ?: emptySet()
-        return feedPostsJson.map { json ->
-            objectMapper.readValue(json, FeedPost::class.java)
-        }
+
+        return feedPostsJson.map { json -> objectMapper.readValue(json, FeedPost::class.java) }
     }
 
-
+    /**
+     * 뉴스 피드 ID 목록 조회
+     */
     override fun getFeedPostIdsForUser(userId: Long, lastFeedPostId: Long?, size: Int): List<Long> {
         val key = getKey(userId)
 
-        // 첫 페이지 조회 시 처음부터 가져오기
         val startIndex = if (lastFeedPostId == null) 0
         else (redisTemplate.opsForZSet().reverseRank(key, lastFeedPostId.toString())?.plus(1) ?: 0)
-        // ZSET에서 lastFeedPostId의 위치를 찾고 다음부터 조회
 
         val endIndex = startIndex + size - 1
+        val feedPostIds = redisTemplate.opsForZSet().reverseRange(key, startIndex, endIndex) ?: emptySet()
 
-        // Redis에서 feedPostId 리스트 가져오기 (정렬 순서는 저장될 때 PK 내림차순이므로 ZRANGE 사용)
-        val feedPostIds = redisTemplate.opsForZSet()
-            .reverseRange(key, startIndex, endIndex) ?: emptySet()
-
-        val res = feedPostIds.map { it.toLong() }
-
-        return res
+        return feedPostIds.map { it.toLong() }
     }
 
+    /**
+     * 개별 게시물 상세 조회
+     */
     override fun getFeedPostFromHash(feedPostId: Long): FeedPostListDto? {
         val key = getHashKey(feedPostId)
         val json = redisTemplate.opsForValue().get(key)
 
-        return if (json != null) {
-            // TTL 갱신 (LRU 삭제 방지)
+        return json?.let {
             redisTemplate.expire(key, Duration.ofDays(7))
             objectMapper.readValue(json, FeedPostListDto::class.java)
-        } else {
-            // 캐시 미스 발생
-            null
         }
     }
 
-    override fun savaFeedPostDtoToHash(feedPostListDto: FeedPostListDto) {
+    /**
+     * 게시물 데이터를 Hash에 저장
+     */
+    override fun saveFeedPostDtoToHash(feedPostListDto: FeedPostListDto) {
         val key = getHashKey(feedPostListDto.feedPostId)
         val json = objectMapper.writeValueAsString(feedPostListDto)
 
         redisTemplate.opsForValue().set(key, json)
-        setExpiration(key, Duration.ofDays(7))
+        redisTemplate.expire(key, Duration.ofDays(7))
     }
 
+    /**
+     * 좋아요 개수 업데이트
+     */
     override fun updateLikeCount(feedPostId: Long, newLikeCount: Int) {
         val key = getHashKey(feedPostId)
         val json = redisTemplate.opsForValue().get(key) ?: return
@@ -93,45 +97,55 @@ class RedisServiceImpl(
         val feedPostListDto = objectMapper.readValue(json, FeedPostListDto::class.java)
         val updatedFeedPostDto = feedPostListDto.copy(likeCount = newLikeCount)
 
-        val updatedJson = objectMapper.writeValueAsString(updatedFeedPostDto)
-        redisTemplate.opsForValue().set(key, updatedJson)
+        redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(updatedFeedPostDto))
     }
 
+    /**
+     * 피드 업데이트
+     */
     override fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto) {
         val key = getHashKey(feedPostUpdateDto.feedPostId)
         val json = redisTemplate.opsForValue().get(key) ?: return
 
         val feedPostListDto = objectMapper.readValue(json, FeedPostListDto::class.java)
-        val updatedFeedPostDto = feedPostUpdateDto.copy(
+        val updatedFeedPostDto = feedPostListDto.copy(
             title = feedPostUpdateDto.title,
             content = feedPostUpdateDto.content
         )
 
-        val updatedJson = objectMapper.writeValueAsString(updatedFeedPostDto)
-        redisTemplate.opsForValue().set(key, updatedJson)
+        redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(updatedFeedPostDto))
     }
 
+    /**
+     * 읽음 처리 (Set으로 저장, ZSet에서 제거)
+     */
     override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
         val readKey = getReadMarkKey(userId)
-        redisTemplate.opsForSet().add(readKey, *readFeedPostIds.map{ it.toString() }.toTypedArray())
-        redisTemplate.expire(readKey, Duration.ofDays(14)) // 14일 후 자동 삭제
+
+        redisTemplate.opsForSet().add(readKey, *readFeedPostIds.map { it.toString() }.toTypedArray())
+        redisTemplate.expire(readKey, Duration.ofDays(14))
 
         val key = getKey(userId)
         redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
     }
 
+    /**
+     * 읽음 처리된 피드 목록 조회
+     */
     override fun getReadMarkList(userId: Long): List<Long> {
         val readKey = getReadMarkKey(userId)
-        return redisTemplate.opsForSet().members(readKey)!!.map { it.toLong() }
+
+        return redisTemplate.opsForSet().members(readKey)?.map { it.toLong() } ?: emptyList()
     }
 
+    /**
+     * 키 만료 시간 설정
+     */
     override fun setExpiration(key: String, duration: Duration) {
         redisTemplate.expire(key, duration)
     }
 
     private fun getKey(userId: Long) = "user:feed:$userId"
-
     private fun getHashKey(feedPostId: Long) = "feedpost:details:$feedPostId"
-
     private fun getReadMarkKey(userId: Long) = "read:feed:$userId"
 }

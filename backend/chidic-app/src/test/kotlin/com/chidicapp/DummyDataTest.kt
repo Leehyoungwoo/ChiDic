@@ -61,7 +61,7 @@ class DummyDataTest {
 
     @Test
     fun `모든 유저 100개의 글 작성`() {
-        for (userId in 2..1001) {
+        for (userId in 2..10) {
             val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
                 "http://localhost:8080/api/make-access-token/$userId",
                 HttpMethod.POST,
@@ -90,6 +90,39 @@ class DummyDataTest {
             }
         }
     }
+
+    @Test
+    fun `모든 유저 1개의 글 작성`() {
+        for (userId in 2..1001) {
+            val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
+                "http://localhost:8080/api/make-access-token/$userId",
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String::class.java
+            )
+            val token = tokenResponse.body
+            if (token != null) {
+                for (i in 1..1) {
+                    val feedPostRequest = FeedPostCreateRequest(
+                        title = "새글 $userId $i 번째 제목",
+                        content = "내용 $userId $i 번째 내용",
+                    )
+
+                    val headers = HttpHeaders().apply {
+                        set("Authorization", "Bearer $token")
+                    }
+                    val entity = HttpEntity(feedPostRequest, headers)
+
+                    val postResponse: ResponseEntity<Void> = testRestTemplate.exchange(
+                        "http://localhost:8080/api/feedposts", HttpMethod.POST, entity, Void::class.java
+                    )
+
+                    println("글 작성 요청 결과 : $postResponse.statusCode")
+                }
+            }
+        }
+    }
+
 
     @Test
     fun `50명의 유저가 1000개의 포스트에 좋아요`() {

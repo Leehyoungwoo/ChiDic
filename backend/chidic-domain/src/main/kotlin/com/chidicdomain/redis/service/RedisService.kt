@@ -11,7 +11,7 @@ interface RedisService {
     fun setExpiration(key: String, duration: Duration)
     fun getFeedPostIdsForUser(userId: Long, lastFeedPostId: Long?, size: Int) : List<Long>
     fun getFeedPostFromHash(feedPostId: Long): FeedPostListDto?
-    fun savaFeedPostDtoToHash(feedPostListDto: FeedPostListDto)
+    fun saveFeedPostDtoToHash(feedPostListDto: FeedPostListDto)
     fun updateLikeCount(feedPostId: Long, newLikeCount: Int)
     fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto)
     fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>)
