@@ -1,3 +1,4 @@
+import io.lettuce.core.ClientOptions
 import io.lettuce.core.SocketOptions
 import io.lettuce.core.cluster.ClusterClientOptions
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions
@@ -33,7 +34,7 @@ class RedisClusterConfig {
 
         // Socket 옵션
         val socketOptions = SocketOptions.builder()
-            .connectTimeout(Duration.ofMillis(100L))
+            .connectTimeout(Duration.ofSeconds(5))  // 타임아웃을 5초로 설정
             .keepAlive(true)
             .build()
 
@@ -41,18 +42,19 @@ class RedisClusterConfig {
         val clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
             .dynamicRefreshSources(true)
             .enableAllAdaptiveRefreshTriggers()
-            .enablePeriodicRefresh(Duration.ofMinutes(30L))
+            .enablePeriodicRefresh(Duration.ofSeconds(30))  // 30초 주기로 갱신
             .build()
 
         // Cluster Client 옵션
         val clientOptions = ClusterClientOptions.builder()
+            .autoReconnect(true)
             .topologyRefreshOptions(clusterTopologyRefreshOptions)
             .socketOptions(socketOptions)
             .build()
 
-        // Lettuce Client 옵션
+        // Lettuce Client 옵션에 autoReconnect 설정 추가
         val clientConfiguration = LettuceClientConfiguration.builder()
-            .clientOptions(clientOptions)
+            .clientOptions(ClientOptions.builder().autoReconnect(true).build())
             .commandTimeout(Duration.ofMillis(3000L))
             .build()
 
