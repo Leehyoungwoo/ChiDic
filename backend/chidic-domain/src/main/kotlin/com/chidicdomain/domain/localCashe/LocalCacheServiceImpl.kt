@@ -10,7 +10,7 @@ class LocalCacheServiceImpl: LocalCacheService {
 
     private val cache: Cache<String, Any> = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
-        .maximumSize(100)
+        .maximumSize(10000)
         .build()
 
     override fun putCache(key: String, value: Any) {

@@ -276,7 +276,7 @@ class DummyDataTest {
 
     // 핫키 테스트
     @Test
-    fun `사용자 10000개 데이터베이스에 넣기`() {
+    fun `사용자 20000개 데이터베이스에 넣기`() {
         for (i in 1002..20000) {
             val user = User(
                 id = 0L,
@@ -292,7 +292,7 @@ class DummyDataTest {
         }
     }
     @Test
-    fun `모든 유저가 게시물 1번에 좋아요`() {
+    fun `모든 유저가 특정 게시물에 좋아요`() {
         for (userId in 1..20000) {
             // 유저별로 액세스 토큰을 받기 위한 요청
             val tokenResponse: ResponseEntity<String> = testRestTemplate.exchange(
@@ -312,7 +312,7 @@ class DummyDataTest {
 
                 // 게시물 1번에 좋아요 요청 보내기
                 val response: ResponseEntity<Void> = testRestTemplate.exchange(
-                    "http://localhost:8080/api/feedposts/3/like",
+                    "http://localhost:8080/api/feedposts/99860/like",
                     HttpMethod.POST,
                     entity,
                     Void::class.java

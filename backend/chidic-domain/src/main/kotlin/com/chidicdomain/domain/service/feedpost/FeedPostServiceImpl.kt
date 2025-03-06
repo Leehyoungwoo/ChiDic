@@ -148,14 +148,8 @@ class FeedPostServiceImpl(
                 val dto = feedPostMapper.toFeedPostListDto(feedPost)
                 feedKafkaProducer.sendFeedCacheUpdateEvent(dto)
 
-                // 핫키 판별
-                if (feedPost.likeCount >= hotKeyThreshold) {
-                    println("핫키 확인")
-                    localCacheService.putCache(feedPost.id.toString(), dto) // 핫키는 로컬 캐시에 저장
-                    println("핫키 확인" + localCacheService.getCache(feedPost.id.toString()))
-                }
-
-                finalFeedPosts.add(dto) // 최종 리스트에 추가
+                // 최종 리스트에 추가
+                finalFeedPosts.add(dto)
             }
         }
 
