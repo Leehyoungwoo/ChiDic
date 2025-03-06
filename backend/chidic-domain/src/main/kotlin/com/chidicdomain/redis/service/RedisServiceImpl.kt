@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 @Service
 class RedisServiceImpl(
@@ -136,6 +137,15 @@ class RedisServiceImpl(
         val readKey = getReadMarkKey(userId)
 
         return redisTemplate.opsForSet().members(readKey)?.map { it.toLong() } ?: emptyList()
+    }
+
+    override fun setIfNotExist(key: String, value: String, ttlInSeconds: Long): Boolean {
+        // Redis에 key가 존재하지 않으면 값을 저장하고, TTL 설정
+        val result = redisTemplate.opsForValue().setIfAbsent(key, value)
+        if (result == true) {
+            redisTemplate.expire(key, ttlInSeconds, TimeUnit.SECONDS)
+        }
+        return result ?: false
     }
 
     /**

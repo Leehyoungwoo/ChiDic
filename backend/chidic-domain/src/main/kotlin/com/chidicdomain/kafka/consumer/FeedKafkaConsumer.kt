@@ -1,5 +1,7 @@
 package com.chidicdomain.kafka.consumer
 
+import com.chidicdomain.dto.FeedPostListDto
+import com.chidicdomain.dto.FeedPostUpdateDto
 import com.chidicdomain.kafka.event.FeedCreatedEvent
 import com.chidicdomain.kafka.event.LikeEvent
 import com.chidicdomain.kafka.event.UnlikeEvent
@@ -54,6 +56,42 @@ class FeedKafkaConsumer(
         }
     }
 
+    @KafkaListener(topics = ["feed-update-events"], groupId = "feed-group")
+    fun consumeUpdateEvent(message: Message<String>) {
+        try {
+            val event = convertMessageToEvent(message, FeedPostUpdateDto::class.java)
+            event?.let {
+                redisService.updateFeed(event)
+            }
+        } catch (e: Exception) {
+            println("Error processing unlike event: ${e.message}")
+        }
+    }
+
+    @KafkaListener(topics = ["feed-cache-update-events"], groupId = "feed-group")
+    fun consumeCacheUpdateEvent(message: Message<String>) {
+        try {
+            val event = convertMessageToEvent(message, FeedPostListDto::class.java)
+            event?.let {
+                // 고유 식별자 생성
+                val messageId = createCacheUpdateMessageId(it.feedPostId, it.likeCount)
+
+                // Redis에서 메시지가 이미 처리되었는지 확인
+                val alreadyProcessed = redisService.setIfNotExist(messageId, "processed", 60 * 1) // 5분 동안 중복 방지
+
+
+                if (alreadyProcessed) {
+                    // 캐시 갱신 작업 수행
+                    redisService.saveFeedPostDtoToHash(it)
+                } else {
+                    println("중복된 메시지입니다: $messageId")
+                }
+            }
+        } catch (e: Exception) {
+            println("Error processing unlike event: ${e.message}")
+        }
+    }
+
     private fun <T> convertMessageToEvent(message: Message<String>, eventType: Class<T>): T? {
         return try {
             val jsonString = message.payload
@@ -62,5 +100,9 @@ class FeedKafkaConsumer(
             println("Error converting message: ${e.message}")
             null
         }
+    }
+
+    private fun createCacheUpdateMessageId(feedPostId: Long, likeCount: Int): String {
+        return "feedPost:$feedPostId:likeCount:$likeCount"
     }
 }

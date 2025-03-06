@@ -16,4 +16,5 @@ interface RedisService {
     fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto)
     fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>)
     fun getReadMarkList(userId: Long): List<Long>
+    fun setIfNotExist(key: String, value: String, ttlInSeconds: Long): Boolean
 }

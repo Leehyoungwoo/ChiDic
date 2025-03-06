@@ -33,7 +33,7 @@ class FeedKafkaProducer(
     }
 
     fun sendFeedCacheUpdateEvent(event: FeedPostListDto) {
-        sendMessage("feed-update-events", event)
+        sendMessage("feed-cache-update-events", event)
     }
 
     private fun sendMessage(topic: String, event: Any) {
