@@ -54,7 +54,7 @@ class RedisClusterConfig {
 
         // Lettuce Client 옵션에 autoReconnect 설정 추가
         val clientConfiguration = LettuceClientConfiguration.builder()
-            .clientOptions(ClientOptions.builder().autoReconnect(true).build())
+            .clientOptions(clientOptions)
             .commandTimeout(Duration.ofMillis(3000L))
             .build()
 
