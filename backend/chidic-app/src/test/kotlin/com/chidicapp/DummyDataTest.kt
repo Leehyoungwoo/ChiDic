@@ -312,7 +312,7 @@ class DummyDataTest {
 
                 // 게시물 1번에 좋아요 요청 보내기
                 val response: ResponseEntity<Void> = testRestTemplate.exchange(
-                    "http://localhost:8080/api/feedposts/99860/like",
+                    "http://localhost:8080/api/feedposts/1555/like",
                     HttpMethod.POST,
                     entity,
                     Void::class.java
