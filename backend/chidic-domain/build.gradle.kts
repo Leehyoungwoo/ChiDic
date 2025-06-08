@@ -34,6 +34,7 @@ dependencies {
     // 레디스 의존성
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+    implementation("org.redisson:redisson-spring-boot-starter:3.29.0")
 
     // 직렬화 라이브러리
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
