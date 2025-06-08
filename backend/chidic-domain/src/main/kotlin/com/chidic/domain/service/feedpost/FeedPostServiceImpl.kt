@@ -12,6 +12,7 @@ import com.chidic.dto.FeedPostListDto
 import com.chidic.dto.FeedPostUpdateDto
 import com.chidic.kafka.event.FeedCreatedEvent
 import com.chidic.kafka.producer.FeedKafkaProducer
+import com.chidic.lock.DistributedLockExecutor
 import com.chidic.redis.service.RedisService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -27,7 +28,8 @@ class FeedPostServiceImpl(
     private val followRepository: FollowRepository,
     private val redisService: RedisService,
     private val feedKafkaProducer: FeedKafkaProducer,
-    private val localCacheService: LocalCacheService
+    private val localCacheService: LocalCacheService,
+    private val lockExecutor: DistributedLockExecutor
 ) : FeedPostService {
     private val hotKeyThreshold = 500
 
@@ -120,10 +122,12 @@ class FeedPostServiceImpl(
 
         return postsFromDb.map { post ->
             val dto = feedPostMapper.toFeedPostListDto(post)
-            feedKafkaProducer.sendFeedCreatedEvent(FeedCreatedEvent(
-                userIds = userList.map { it.id },
-                feedPostListDto = dto
-            ))
+            feedKafkaProducer.sendFeedCreatedEvent(
+                FeedCreatedEvent(
+                    userIds = userList.map { it.id },
+                    feedPostListDto = dto
+                )
+            )
             dto
         }
     }
@@ -132,28 +136,31 @@ class FeedPostServiceImpl(
      *  Redis에서 개별 게시글 조회 & 캐시 미스 처리
      */
     private fun getFeedPostsFromCacheOrDB(cachedFeedPostIds: List<Long>): List<FeedPostListDto> {
-        // 캐시 히트/미스 분리
-        val (cachedFeedPosts, missingFeedPostIds) = cachedFeedPostIds
-            .map { it to (localCacheService.getCache(it.toString()) as? FeedPostListDto ?: redisService.getFeedPostFromHash(it)) } // 로컬 캐시 먼저 확인 후 Redis 조회
-            .partition { it.second != null } // 캐시 히트/미스 분리
+        val feedPostLists = mutableListOf<FeedPostListDto>()
 
-        // 캐시에서 히트한 게시글 처리
-        val finalFeedPosts = cachedFeedPosts.mapNotNull { it.second }.toMutableList()
+        cachedFeedPostIds.forEach { feedPostId ->
+            val cachedFeedPost = localCacheService.getCache(feedPostId.toString()) as? FeedPostListDto
+                ?: redisService.getFeedPostFromHash(feedPostId)
 
-        // 캐시 미스 발생 시 DB에서 조회
-        if (missingFeedPostIds.isNotEmpty()) {
-            val missingFeedPosts = feedPostRepository.findAllById(missingFeedPostIds.map { it.first }) // id 리스트 사용
-
-            missingFeedPosts.forEach { feedPost ->
-                val dto = feedPostMapper.toFeedPostListDto(feedPost)
-                feedKafkaProducer.sendFeedCacheUpdateEvent(dto)
-
-                // 최종 리스트에 추가
-                finalFeedPosts.add(dto)
+            if (cachedFeedPost != null) {
+                feedPostLists += cachedFeedPost
+                return@forEach
             }
+
+            val feedPostListDto = lockExecutor.execute(
+                key = "lock:feedPost:$feedPostId",
+                cache = { redisService.getFeedPostFromHash(feedPostId) },
+                critical = {
+                    val entity = feedPostRepository.findById(feedPostId)
+                        .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
+                    feedPostMapper.toFeedPostListDto(entity).also(redisService::saveFeedPostDtoToHash)
+                }
+            )
+
+            feedPostLists += feedPostListDto
         }
 
-        return finalFeedPosts
+        return feedPostLists
     }
 }
 
