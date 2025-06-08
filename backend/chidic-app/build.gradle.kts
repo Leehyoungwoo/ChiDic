@@ -1,7 +1,13 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
 	kotlin("plugin.spring")
 	id("org.springframework.boot")
 	id("io.spring.dependency-management")
+}
+
+tasks.getByName<BootJar>("bootJar") {
+	enabled = true
 }
 
 dependencies {
