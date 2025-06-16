@@ -100,6 +100,7 @@ class FeedPostServiceImpl(
         val feedPost = feedPostRepository.findById(feedPostId)
             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
         feedPost.deleteData()
+        redisService.deleteFeedPostHash(feedPostId)
     }
 
     /**

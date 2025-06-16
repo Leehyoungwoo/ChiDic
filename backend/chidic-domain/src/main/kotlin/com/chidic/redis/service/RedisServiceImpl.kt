@@ -148,6 +148,11 @@ class RedisServiceImpl(
         return result ?: false
     }
 
+    override fun deleteFeedPostHash(feedPostId: Long) {
+        val key = getHashKey(feedPostId)
+        redisTemplate.delete(key)
+    }
+
     /**
      * 키 만료 시간 설정
      */
