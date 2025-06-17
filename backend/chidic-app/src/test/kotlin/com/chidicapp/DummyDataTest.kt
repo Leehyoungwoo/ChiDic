@@ -1,10 +1,10 @@
 package com.chidicapp
 
-import com.chidicapp.api.request.FeedPostCreateRequest
-import com.chidicdomain.domain.entity.User
-import com.chidicdomain.domain.repository.UserRepository
-import com.chidicdomain.type.Provider
-import com.chidicdomain.type.Role
+import com.chidic.api.request.FeedPostCreateRequest
+import com.chidic.domain.entity.User
+import com.chidic.domain.repository.UserRepository
+import com.chidic.type.Provider
+import com.chidic.type.Role
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
