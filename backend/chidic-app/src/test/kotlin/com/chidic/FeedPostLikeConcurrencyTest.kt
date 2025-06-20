@@ -1,6 +1,6 @@
-package com.chidicapp
+package com.chidic
 
-import com.chidicdomain.domain.repository.FeedPostRepository
+import com.chidic.domain.repository.FeedPostRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +21,7 @@ class FeedPostLikeConcurrencyTest {
     lateinit var feedPostRepository: FeedPostRepository
 
     @Test
-    fun `10명의 유저가 동시에 글 2024를 좋아요 요청`() {
+    fun `ten users concurrently like post 3001`() {
         val executorService: ExecutorService = Executors.newFixedThreadPool(10) // 10개 스레드
         val latch = CountDownLatch(1) // 모든 스레드가 동시에 시작하도록 동기화
 
