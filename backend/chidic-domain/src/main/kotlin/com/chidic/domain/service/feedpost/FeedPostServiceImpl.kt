@@ -40,20 +40,29 @@ class FeedPostServiceImpl(
         start: Long
     ): List<FeedPostListDto> {
         // Redis에서 feedPostId 리스트 조회
-        val cachedFeedPostIds = redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
+        val cachedFeedPostIds = try {
+            redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
+        } catch (e: Exception) {
+            logger.warn("Redis 장애 발생, DB fallback 수행: ${e.message}")
+            emptyList()
+        }
 
-        // 캐시 미스일 경우 DB에서 조회
         if (cachedFeedPostIds.isEmpty()) {
             return fetchAndCacheFeedFromDB(userId, size)
         }
 
+
         // Redis에서 개별 feedPost 조회 & 캐시 미스 처리
         val finalFeedPosts = getFeedPostsFromCacheOrDB(cachedFeedPostIds)
 
-        // 읽음 처리 (Redis 업데이트)
+        // 읽음 처리
         if (finalFeedPosts.isNotEmpty()) {
-            redisService.markReadAsFeed(userId, cachedFeedPostIds)
+            try {
+                redisService.markReadAsFeed(userId, cachedFeedPostIds)
+            } catch (e: Exception) {
+                logger.warn("읽음 처리 실패: ${e.message}")
         }
+}
 
         return finalFeedPosts.sortedByDescending { it.feedPostId }
     }
@@ -107,7 +116,12 @@ class FeedPostServiceImpl(
      *  캐시 미스 시 DB에서 데이터를 가져와 Redis에 캐싱
      */
     private fun fetchAndCacheFeedFromDB(userId: Long, size: Int): List<FeedPostListDto> {
-        val readFeedPostIds = redisService.getReadMarkList(userId)
+        val readFeedPostIds = try {
+            redisService.getReadMarkList(userId)
+        } catch (e: Exception) {
+            logger.warn("Redis 장애로 readMark 조회 실패: ${e.message}")
+            emptyList()
+        }
 
         val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
         val userList = followList.mapNotNull { it.followee }
@@ -119,7 +133,11 @@ class FeedPostServiceImpl(
         )
 
         // 디비에서 가져온 피드도 읽음 처리
-        redisService.markReadAsFeed(userId, postsFromDb.map { it.id })
+        try {
+            redisService.markReadAsFeed(userId, postsFromDb.map { it.id })
+        } catch (e: Exception) {
+            logger.warn("Redis 장애로 읽음 처리 실패: ${e.message}")
+        }
 
         return postsFromDb.map { post ->
             val dto = feedPostMapper.toFeedPostListDto(post)
@@ -140,8 +158,13 @@ class FeedPostServiceImpl(
         val feedPostLists = mutableListOf<FeedPostListDto>()
 
         cachedFeedPostIds.forEach { feedPostId ->
-            val cachedFeedPost = localCacheService.getCache(feedPostId.toString()) as? FeedPostListDto
+            val cachedFeedPost = try {
+                localCacheService.getCache(feedPostId.toString()) as? FeedPostListDto
                 ?: redisService.getFeedPostFromHash(feedPostId)
+            } catch (e: Exception) {
+                logger.warn("feedPost 캐시 조회 실패, DB fallback: ${e.message}")
+                null
+            }
 
             if (cachedFeedPost != null) {
                 feedPostLists += cachedFeedPost
