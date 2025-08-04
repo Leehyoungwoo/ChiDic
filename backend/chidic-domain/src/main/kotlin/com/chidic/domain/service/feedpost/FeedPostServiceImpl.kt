@@ -32,37 +32,28 @@ class FeedPostServiceImpl(
     private val lockExecutor: DistributedLockExecutor
 ) : FeedPostService {
     private val hotKeyThreshold = 500
+    private val MAX_CACHE_SIZE = 600
 
     override fun getFollowedUsersFeed(
         userId: Long,
-        lastFeedPostId: Long?,
+        lastFeedPostId: Long,
         size: Int,
         start: Long
     ): List<FeedPostListDto> {
+        val end = getEndIndex(start, size)
         // Redis에서 feedPostId 리스트 조회
         val cachedFeedPostIds = try {
-            redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
+            redisService.getFeedPostIdsForUser(userId, start, end)
         } catch (e: Exception) {
             emptyList()
         }
 
-        if (cachedFeedPostIds.isEmpty()) {
-            return fetchAndCacheFeedFromDB(userId, size)
+        return if (start > MAX_CACHE_SIZE || cachedFeedPostIds.isEmpty()) {
+            fetchAndCacheFeedFromDB(userId, lastFeedPostId, size)
+        } else {
+            getFeedPostsFromCacheOrDB(cachedFeedPostIds)
+                .sortedByDescending { it.feedPostId }
         }
-
-
-        // Redis에서 개별 feedPost 조회 & 캐시 미스 처리
-        val finalFeedPosts = getFeedPostsFromCacheOrDB(cachedFeedPostIds)
-
-        // 읽음 처리
-        if (finalFeedPosts.isNotEmpty()) {
-            try {
-                redisService.markReadAsFeed(userId, cachedFeedPostIds)
-            } catch (e: Exception) {
-        }
-}
-
-        return finalFeedPosts.sortedByDescending { it.feedPostId }
     }
 
     override fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto {
@@ -113,27 +104,15 @@ class FeedPostServiceImpl(
     /**
      *  캐시 미스 시 DB에서 데이터를 가져와 Redis에 캐싱
      */
-    private fun fetchAndCacheFeedFromDB(userId: Long, size: Int): List<FeedPostListDto> {
-        val readFeedPostIds = try {
-            redisService.getReadMarkList(userId)
-        } catch (e: Exception) {
-            emptyList()
-        }
-
+    private fun fetchAndCacheFeedFromDB(userId: Long, lastFeedPostId: Long, size: Int,): List<FeedPostListDto> {
         val followList = followRepository.findAllByFollower(userRepository.getReferenceById(userId))
         val userList = followList.mapNotNull { it.followee }
 
-        val postsFromDb = feedPostRepository.findUnreadFeedPosts(
+        val postsFromDb = feedPostRepository.findLatestPosts(
             userList,
-            readFeedPostIds.map { it.toLong() },
+            lastFeedPostId,
             PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"))
         )
-
-        // 디비에서 가져온 피드도 읽음 처리
-        try {
-            redisService.markReadAsFeed(userId, postsFromDb.map { it.id })
-        } catch (e: Exception) {
-        }
 
         return postsFromDb.map { post ->
             val dto = feedPostMapper.toFeedPostListDto(post)
@@ -180,6 +159,10 @@ class FeedPostServiceImpl(
         }
 
         return feedPostLists
+    }
+
+    companion object PagingUtil {
+        fun getEndIndex(start: Long, size: Int) = (start +  size - 1)
     }
 }
 

@@ -6,7 +6,7 @@ import com.chidic.dto.FeedPostListDto
 import com.chidic.dto.FeedPostUpdateDto
 
 interface FeedPostService {
-    fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long?, size: Int, start: Long): List<FeedPostListDto>
+    fun getFollowedUsersFeed(userId: Long, lastFeedPostId: Long, size: Int, start: Long): List<FeedPostListDto>
     fun getFeedPostDetail(feedPostId: Long): FeedPostDetailDto
     fun createFeed(feedPostCreateDto: FeedPostCreateDto)
     fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto)
