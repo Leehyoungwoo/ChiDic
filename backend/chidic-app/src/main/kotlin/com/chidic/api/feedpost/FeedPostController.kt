@@ -22,7 +22,7 @@ class FeedPostController(
     @GetMapping("/newsfeed")
     @ResponseStatus(HttpStatus.OK)
     fun getNewsFeed(
-        @RequestParam(required = false) lastFeedPostId: Long?,
+        @RequestParam(required = false, defaultValue = "${Long.MAX_VALUE}") lastFeedPostId: Long,
         @RequestParam(required = false, defaultValue = "20") size: Int,
         @RequestParam(required = false, defaultValue = "0") start: Long,
         @AuthenticationPrincipal principal: OAuth2UserDetails
