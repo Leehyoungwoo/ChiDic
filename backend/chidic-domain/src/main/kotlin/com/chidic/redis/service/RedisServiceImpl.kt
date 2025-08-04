@@ -29,7 +29,6 @@ class RedisServiceImpl(
         val score = System.currentTimeMillis().toDouble()
 
         redisTemplate.opsForZSet().add(redisKey, feedPostListDto.feedPostId.toString(), score)
-        saveFeedPostDtoToHash(feedPostListDto)
 
         // ZSET 크기 제한 (600개 유지)
         val maxSize = 600L
