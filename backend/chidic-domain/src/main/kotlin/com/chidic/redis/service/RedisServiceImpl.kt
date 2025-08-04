@@ -31,8 +31,8 @@ class RedisServiceImpl(
         redisTemplate.opsForZSet().add(redisKey, feedPostListDto.feedPostId.toString(), score)
         saveFeedPostDtoToHash(feedPostListDto)
 
-        // ZSET 크기 제한 (1000개 유지)
-        val maxSize = 1000L
+        // ZSET 크기 제한 (600개 유지)
+        val maxSize = 600L
         val currentSize = redisTemplate.opsForZSet().size(redisKey) ?: 0L
         if (currentSize > maxSize) {
             val removeCount = currentSize - maxSize
@@ -101,7 +101,7 @@ class RedisServiceImpl(
         )
 
         redisTemplate.opsForHash<String, String>().putAll(key, map)
-        redisTemplate.expire(key, Duration.ofDays(7))
+        redisTemplate.expire(key, Duration.ofDays(14))
     }
 
     /**
