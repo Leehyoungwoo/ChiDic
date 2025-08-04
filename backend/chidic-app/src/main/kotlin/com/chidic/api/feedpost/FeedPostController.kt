@@ -9,6 +9,7 @@ import com.chidic.domain.service.feedpost.FeedPostService
 import com.chidic.dto.FeedPostCreateDto
 import com.chidic.dto.FeedPostDetailDto
 import com.chidic.dto.FeedPostUpdateDto
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -46,7 +47,7 @@ class FeedPostController(
     @ResponseStatus(HttpStatus.OK)
     fun createFeed(
         @AuthenticationPrincipal principal: OAuth2UserDetails,
-        @RequestBody feedPostCreateRequest: FeedPostCreateRequest
+        @Valid @RequestBody feedPostCreateRequest: FeedPostCreateRequest
     ) {
         val userId = principal.getId()
         val feedPostCreateDto = FeedPostMapper.requestToFeedCreateDto(userId, feedPostCreateRequest)
