@@ -53,16 +53,13 @@ class RedisServiceImpl(
     /**
      * 뉴스 피드 ID 목록 조회
      */
-    override fun getFeedPostIdsForUser(userId: Long, lastFeedPostId: Long?, size: Int): List<Long> {
+    override fun getFeedPostIdsForUser(userId: Long, start: Long, end: Long): List<Long> {
         val key = getKey(userId)
 
-        val startIndex = if (lastFeedPostId == null) 0
-        else (redisTemplate.opsForZSet().reverseRank(key, lastFeedPostId.toString())?.plus(1) ?: 0)
-
-        val endIndex = startIndex + size - 1
-        val feedPostIds = redisTemplate.opsForZSet().reverseRange(key, startIndex, endIndex) ?: emptySet()
-
-        return feedPostIds.map { it.toLong() }
+        return redisTemplate.opsForZSet()
+            .reverseRange(key, start, end)
+            ?.let { set -> set.map { it.toLong() } }
+            ?: emptyList()
     }
 
     /**
@@ -126,27 +123,27 @@ class RedisServiceImpl(
         ops.put(key, "content", feedPostUpdateDto.content)
     }
 
-    /**
-     * 읽음 처리 (Set으로 저장, ZSet에서 제거)
-     */
-    override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
-        val readKey = getReadMarkKey(userId)
+//    /**
+//     * 읽음 처리 (Set으로 저장, ZSet에서 제거)
+//     */
+//    override fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>) {
+//        val readKey = getReadMarkKey(userId)
+//
+//        redisTemplate.opsForSet().add(readKey, *readFeedPostIds.map { it.toString() }.toTypedArray())
+//        redisTemplate.expire(readKey, Duration.ofDays(14))
+//
+//        val key = getKey(userId)
+//        redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
+//    }
 
-        redisTemplate.opsForSet().add(readKey, *readFeedPostIds.map { it.toString() }.toTypedArray())
-        redisTemplate.expire(readKey, Duration.ofDays(14))
-
-        val key = getKey(userId)
-        redisTemplate.opsForZSet().remove(key, *readFeedPostIds.map { it.toString() }.toTypedArray())
-    }
-
-    /**
-     * 읽음 처리된 피드 목록 조회
-     */
-    override fun getReadMarkList(userId: Long): List<Long> {
-        val readKey = getReadMarkKey(userId)
-
-        return redisTemplate.opsForSet().members(readKey)?.map { it.toLong() } ?: emptyList()
-    }
+//    /**
+//     * 읽음 처리된 피드 목록 조회
+//     */
+//    override fun getReadMarkList(userId: Long): List<Long> {
+//        val readKey = getReadMarkKey(userId)
+//
+//        return redisTemplate.opsForSet().members(readKey)?.map { it.toLong() } ?: emptyList()
+//    }
 
     override fun setIfNotExist(key: String, value: String, ttlInSeconds: Long): Boolean {
         // Redis에 key가 존재하지 않으면 값을 저장하고, TTL 설정
