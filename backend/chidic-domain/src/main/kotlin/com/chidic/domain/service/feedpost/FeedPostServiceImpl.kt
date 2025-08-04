@@ -43,7 +43,6 @@ class FeedPostServiceImpl(
         val cachedFeedPostIds = try {
             redisService.getFeedPostIdsForUser(userId, lastFeedPostId, size)
         } catch (e: Exception) {
-            logger.warn("Redis 장애 발생, DB fallback 수행: ${e.message}")
             emptyList()
         }
 
@@ -60,7 +59,6 @@ class FeedPostServiceImpl(
             try {
                 redisService.markReadAsFeed(userId, cachedFeedPostIds)
             } catch (e: Exception) {
-                logger.warn("읽음 처리 실패: ${e.message}")
         }
 }
 
@@ -119,7 +117,6 @@ class FeedPostServiceImpl(
         val readFeedPostIds = try {
             redisService.getReadMarkList(userId)
         } catch (e: Exception) {
-            logger.warn("Redis 장애로 readMark 조회 실패: ${e.message}")
             emptyList()
         }
 
@@ -136,7 +133,6 @@ class FeedPostServiceImpl(
         try {
             redisService.markReadAsFeed(userId, postsFromDb.map { it.id })
         } catch (e: Exception) {
-            logger.warn("Redis 장애로 읽음 처리 실패: ${e.message}")
         }
 
         return postsFromDb.map { post ->
@@ -162,7 +158,6 @@ class FeedPostServiceImpl(
                 localCacheService.getCache(feedPostId.toString()) as? FeedPostListDto
                 ?: redisService.getFeedPostFromHash(feedPostId)
             } catch (e: Exception) {
-                logger.warn("feedPost 캐시 조회 실패, DB fallback: ${e.message}")
                 null
             }
 
