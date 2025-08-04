@@ -2,7 +2,7 @@ package com.chidic.kafka.producer
 
 import com.chidic.dto.FeedPostListDto
 import com.chidic.dto.FeedPostUpdateDto
-import com.chidic.kafka.event.FeedCreatedEvent
+import com.chidic.kafka.event.FeedCreateEvent
 import com.chidic.kafka.event.LikeEvent
 import com.chidic.kafka.event.UnlikeEvent
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,7 +14,7 @@ class FeedKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, Any>,
     private val objectMapper: ObjectMapper
 ) {
-    fun sendFeedCreatedEvent(event: FeedCreatedEvent) {
+    fun sendFeedCreatedEvent(event: FeedCreateEvent) {
         sendMessage("feed-events", event)
     }
 

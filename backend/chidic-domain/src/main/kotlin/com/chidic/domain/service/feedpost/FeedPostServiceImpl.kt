@@ -10,7 +10,7 @@ import com.chidic.dto.FeedPostCreateDto
 import com.chidic.dto.FeedPostDetailDto
 import com.chidic.dto.FeedPostListDto
 import com.chidic.dto.FeedPostUpdateDto
-import com.chidic.kafka.event.FeedCreatedEvent
+import com.chidic.kafka.event.FeedCreateEvent
 import com.chidic.kafka.producer.FeedKafkaProducer
 import com.chidic.lock.DistributedLockExecutor
 import com.chidic.redis.service.RedisService
@@ -77,7 +77,7 @@ class FeedPostServiceImpl(
         val feedPostListDto = feedPostMapper.toFeedPostListDto(newFeedPost)
 
         feedKafkaProducer.sendFeedCreatedEvent(
-            FeedCreatedEvent(
+            FeedCreateEvent(
                 userIds = followers.map { it.follower!!.id },
                 feedPostListDto = feedPostListDto
             )
@@ -117,7 +117,7 @@ class FeedPostServiceImpl(
         return postsFromDb.map { post ->
             val dto = feedPostMapper.toFeedPostListDto(post)
             feedKafkaProducer.sendFeedCreatedEvent(
-                FeedCreatedEvent(
+                FeedCreateEvent(
                     userIds = userList.map { it.id },
                     feedPostListDto = dto
                 )

@@ -1,7 +1,7 @@
 package com.chidic.kafka.config
 
 import com.chidic.dto.FeedPostUpdateDto
-import com.chidic.kafka.event.FeedCreatedEvent
+import com.chidic.kafka.event.FeedCreateEvent
 import com.chidic.kafka.event.LikeEvent
 import com.chidic.kafka.event.UnlikeEvent
 import org.apache.kafka.clients.admin.NewTopic
@@ -20,7 +20,7 @@ class KafkaConfig {
 
     @Bean
     fun feedEventsTopic(): NewTopic {
-        return TopicBuilder.name("feed-events").partitions(3).replicas(1).build()
+        return TopicBuilder.name("feed-create-events").partitions(3).replicas(1).build()
     }
 
     @Bean
@@ -41,7 +41,7 @@ class KafkaConfig {
     @Bean
     fun eventTopics(): Map<String, Class<out Any>> {
         return mapOf(
-            "feed-events" to FeedCreatedEvent::class.java,
+            "feed-events" to FeedCreateEvent::class.java,
             "feed-like-events" to LikeEvent::class.java,
             "feed-unlike-events" to UnlikeEvent::class.java,
             "feed-update-events" to FeedPostUpdateDto::class.java
