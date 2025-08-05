@@ -5,6 +5,7 @@ import com.chidic.domain.entity.User
 import io.lettuce.core.dynamic.annotation.Param
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -37,6 +38,28 @@ interface FeedPostRepository : JpaRepository<FeedPost, Long> {
         @Param("lastId") lastId: Long,
         pageable: Pageable
     ): List<FeedPost>
+
+    @Modifying
+    @Query(
+        """
+        UPDATE FeedPost f  
+        SET f.likeCount = f.likeCount + 1  
+        where f.id = :feedPostId
+        """
+    ) fun incrementLikeCount(
+        @Param("feedPostId") feedPostId: Long
+    ): Int
+
+    @Modifying
+    @Query(
+        """
+            UPDATE FeedPost f
+            SET f.likeCount = f.likeCount - 1
+            where f.id = :feedPostId
+        """
+    ) fun decrementLikeCount(
+        @Param("feedPostId") feedPostId: Long
+    ): Int
 
 
 
