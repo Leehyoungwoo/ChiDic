@@ -4,7 +4,7 @@ import com.chidic.domain.entity.id.PostLikeId
 import jakarta.persistence.*
 
 @Entity
-class FeedPostLIke(
+class FeedPostLike(
     @EmbeddedId
     val id: PostLikeId,
 
@@ -26,11 +26,9 @@ class FeedPostLIke(
 
     fun likePost() {
         isLiked = true
-        feedPost?.increaseLikeCount()
     }
 
     fun unlikePost() {
         isLiked = false
-        feedPost?.decreaseLikeCount()
     }
 }
