@@ -19,4 +19,6 @@ interface RedisService {
 //    fun getReadMarkList(userId: Long): List<Long>
     fun setIfNotExist(key: String, value: String, ttlInSeconds: Long): Boolean
     fun deleteFeedPostHash(feedPostId: Long)
+    fun publish(channel: String, feedPostId: Long)
+    fun subscribeAndWait(channel: String, messageFilter: String, timeoutMs: Long): String
 }

@@ -5,6 +5,7 @@ import com.chidic.dto.FeedPostListDto
 import com.chidic.dto.FeedPostUpdateDto
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import org.redisson.api.RedissonClient
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit
 @Service
 class RedisServiceImpl(
     private val redisTemplate: StringRedisTemplate,
+    private val redissonClient: RedissonClient,
     private val objectMapper: ObjectMapper
 ) : RedisService {
 
@@ -173,6 +175,40 @@ class RedisServiceImpl(
     override fun deleteFeedPostHash(feedPostId: Long) {
         val key = getHashKey(feedPostId)
         redisTemplate.delete(key)
+    }
+
+    override fun publish(channel: String, feedPostId: Long) {
+        val topic = redissonClient.getTopic(channel)
+        topic.publish(feedPostId.toString())
+    }
+
+    override fun subscribeAndWait(
+        channel: String,
+        messageFilter: String,
+        timeoutMs: Long
+    ): String {
+        val topic = redissonClient.getTopic(channel)
+        val latch = java.util.concurrent.CountDownLatch(1)
+        var messageReceived: String? = null
+
+        // 1. 메시지 리스너 등록 (필터링 적용)
+        val listenerId = topic.addListener(String::class.java) { _, msg ->
+            if (msg == messageFilter) {
+                messageReceived = msg
+                latch.countDown() // 원하는 메시지면 대기 해제
+            }
+        }
+
+        try {
+            // 2. 타임아웃까지 대기
+            latch.await(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+        } finally {
+            // 3. 리스너 해제 (메모리 누수 방지)
+            topic.removeListener(listenerId)
+        }
+
+        // 메시지를 못 받으면 빈 문자열 반환
+        return messageReceived ?: ""
     }
 
     /**

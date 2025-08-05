@@ -14,6 +14,7 @@ import com.chidic.kafka.event.FeedCreateEvent
 import com.chidic.kafka.producer.FeedKafkaProducer
 import com.chidic.lock.DistributedLockExecutor
 import com.chidic.redis.service.RedisService
+import org.redisson.api.RedissonClient
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -29,7 +30,8 @@ class FeedPostServiceImpl(
     private val redisService: RedisService,
     private val feedKafkaProducer: FeedKafkaProducer,
     private val localCacheService: LocalCacheService,
-    private val lockExecutor: DistributedLockExecutor
+    private val lockExecutor: DistributedLockExecutor,
+    private val redissonClient: RedissonClient
 ) : FeedPostService {
     private val hotKeyThreshold = 500
     private val MAX_CACHE_SIZE = 600
@@ -133,9 +135,10 @@ class FeedPostServiceImpl(
         val feedPostLists = mutableListOf<FeedPostListDto>()
 
         cachedFeedPostIds.forEach { feedPostId ->
+            // 1. 1차 캐시 조회 (로컬 → Redis)
             val cachedFeedPost = try {
                 localCacheService.getCache(feedPostId.toString()) as? FeedPostListDto
-                ?: redisService.getFeedPostFromHash(feedPostId)
+                    ?: redisService.getFeedPostFromHash(feedPostId)
             } catch (e: Exception) {
                 null
             }
@@ -145,17 +148,45 @@ class FeedPostServiceImpl(
                 return@forEach
             }
 
-            val feedPostListDto = lockExecutor.execute(
-                key = "lock:feedPost:$feedPostId",
-                cache = { redisService.getFeedPostFromHash(feedPostId) },
-                critical = {
-                    val entity = feedPostRepository.findById(feedPostId)
-                        .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
-                    feedPostMapper.toFeedPostListDto(entity).also(redisService::saveFeedPostDtoToHash)
-                }
-            )
+            // 2. 캐시 미스 → 바로 구독 시작
+            val latch = java.util.concurrent.CountDownLatch(1)
+            var fromCache: FeedPostListDto? = null
 
-            feedPostLists += feedPostListDto
+            val topic = redissonClient.getTopic("channel:feedpost:ready")
+            val listenerId = topic.addListener(String::class.java) { _, msg ->
+                if (msg == feedPostId.toString()) {
+                    fromCache = redisService.getFeedPostFromHash(feedPostId)
+                    latch.countDown()
+                }
+            }
+
+            try {
+                // 3. 분산락 처리
+                val feedPostListDto = lockExecutor.execute(
+                    key = "lock:feedPost:{${feedPostId}}",
+                    cache = { redisService.getFeedPostFromHash(feedPostId) },
+                    critical = {
+                        val entity = feedPostRepository.findById(feedPostId)
+                            .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
+                        val dto = feedPostMapper.toFeedPostListDto(entity)
+
+                        // 캐시 채우고 Pub 발행
+                        redisService.saveFeedPostDtoToHash(dto)
+                        redisService.publish("channel:feedpost:ready", feedPostId)
+                        dto
+                    },
+                    onLockFail = {
+                        // 락 실패 시 → 이미 구독 중이므로 메시지 대기
+                        latch.await(300, java.util.concurrent.TimeUnit.MILLISECONDS)
+                        fromCache
+                    }
+                )
+
+                feedPostLists += feedPostListDto
+            } finally {
+                // 4. 리스너 해제 (메모리 누수 방지)
+                topic.removeListener(listenerId)
+            }
         }
 
         return feedPostLists
