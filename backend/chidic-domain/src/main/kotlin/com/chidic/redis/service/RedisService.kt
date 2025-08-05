@@ -6,7 +6,7 @@ import com.chidic.dto.FeedPostUpdateDto
 import java.time.Duration
 
 interface RedisService {
-    fun saveFeedPost(userId: Long, feedPostListDto: FeedPostListDto)
+    fun saveFeedPostIds(followerIds: List<Long>, feedPostId: Long)
     fun getFeedPosts(userId: Long, start: Long, end: Long): List<FeedPost>
     fun setExpiration(key: String, duration: Duration)
     fun getFeedPostIdsForUser(userId: Long, start: Long, end: Long) : List<Long>

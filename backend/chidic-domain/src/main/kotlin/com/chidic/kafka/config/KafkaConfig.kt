@@ -39,6 +39,11 @@ class KafkaConfig {
     }
 
     @Bean
+    fun feedFanoutEventsTopic(): NewTopic {
+        return TopicBuilder.name("feed-fanout-events").partitions(3).replicas(1).build()
+    }
+
+    @Bean
     fun eventTopics(): Map<String, Class<out Any>> {
         return mapOf(
             "feed-events" to FeedCreateEvent::class.java,

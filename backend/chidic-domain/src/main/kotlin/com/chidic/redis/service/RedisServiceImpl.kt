@@ -17,6 +17,10 @@ class RedisServiceImpl(
     private val objectMapper: ObjectMapper
 ) : RedisService {
 
+    companion object {
+        private const val MAX_FEED_SIZE = 600L
+    }
+
     init {
         objectMapper.registerModule(JavaTimeModule())
     }
@@ -24,17 +28,22 @@ class RedisServiceImpl(
     /**
      * 뉴스 피드 저장
      */
-    override fun saveFeedPost(userId: Long, feedPostListDto: FeedPostListDto) {
+    override fun saveFeedPostIds(userIds: List<Long>, feedPostId: Long) {
+        userIds.forEach { userId ->
+            this.pushFeedPostIdToEachUser(userId, feedPostId, System.currentTimeMillis().toDouble())
+        }
+    }
+
+    private fun pushFeedPostIdToEachUser(userId: Long, feedPostId: Long, score: Double) {
         val redisKey = getKey(userId)
-        val score = System.currentTimeMillis().toDouble()
 
-        redisTemplate.opsForZSet().add(redisKey, feedPostListDto.feedPostId.toString(), score)
+        // 1. PK만 ZSet에 추가
+        redisTemplate.opsForZSet().add(redisKey, feedPostId.toString(), score)
 
-        // ZSET 크기 제한 (600개 유지)
-        val maxSize = 600L
+        // 2. 사이즈 제한 (600개 유지)
         val currentSize = redisTemplate.opsForZSet().size(redisKey) ?: 0L
-        if (currentSize > maxSize) {
-            val removeCount = currentSize - maxSize
+        if (currentSize > MAX_FEED_SIZE) {
+            val removeCount = currentSize - MAX_FEED_SIZE
             redisTemplate.opsForZSet().removeRange(redisKey, 0, removeCount - 1)
         }
     }
