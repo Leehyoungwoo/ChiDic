@@ -47,11 +47,16 @@ class FeedPostLikeServiceImpl(
     }
 
     @Transactional
-    override fun createLikeAndIncrementCount(userId: Long, feedPostId: Long) {
+    override fun createLikeAndIncrementCount(userId: Long, feedPostId: Long): Boolean {
         val proxyUser = userRepository.getReferenceById(userId)
         val proxyFeedPost = feedPostRepository.getReferenceById(feedPostId)
+        val postLikeId = PostLikeId(feedPostId, userId)
 
-        val feedPostLike = findOrCreateFeedPostLike(PostLikeId(feedPostId, userId), proxyUser, proxyFeedPost)
+        val feedPostLike = findOrCreateFeedPostLike(postLikeId, proxyUser, proxyFeedPost)
+
+        if (feedPostLike.isLiked) {
+            return false
+        }
 
         val newLikeCount = feedPostRepository.incrementLikeCount(feedPostId)
 
@@ -60,6 +65,8 @@ class FeedPostLikeServiceImpl(
             // 핫키인 경우 로컬 캐시에 저장
             localCacheService.putCache(feedPostId.toString(), feedPostMapper.toFeedPostListDto(feedPostLike.feedPost!!))
         }
+
+        return true
     }
 
     override fun unlikeFeedPost(userId: Long, feedPostId: Long) {
@@ -72,9 +79,14 @@ class FeedPostLikeServiceImpl(
     }
 
     @Transactional
-    override fun decrementCount(userId: Long, feedPostId: Long) {
+    override fun decrementCount(userId: Long, feedPostId: Long): Boolean {
         val feedPostLike = feedPostLikeRepository.findById(PostLikeId(feedPostId, userId)).orElse(null)
             ?: throw IllegalStateException("좋아요가 존재하지 않습니다")
+
+        if (!feedPostLike.isLiked) {
+            return false
+        }
+
         feedPostLike.unlikePost()
 
         val likeCountAfterUnlike = feedPostRepository.decrementLikeCount(feedPostId)
@@ -92,6 +104,8 @@ class FeedPostLikeServiceImpl(
                 localCacheService.removeCache(feedPostId.toString())
             }
         }
+
+        return true
     }
 
     private fun findOrCreateFeedPostLike(
