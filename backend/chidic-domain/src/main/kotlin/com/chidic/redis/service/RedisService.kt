@@ -12,7 +12,8 @@ interface RedisService {
     fun getFeedPostIdsForUser(userId: Long, start: Long, end: Long) : List<Long>
     fun getFeedPostFromHash(feedPostId: Long): FeedPostListDto?
     fun saveFeedPostDtoToHash(feedPostListDto: FeedPostListDto)
-    fun updateLikeCount(feedPostId: Long, newLikeCount: Int)
+    fun updateLikeCount(feedPostId: Long)
+    fun updateUnlikeCount(feedPostId: Long)
     fun updateFeed(feedPostUpdateDto: FeedPostUpdateDto)
 //    fun markReadAsFeed(userId: Long, readFeedPostIds: List<Long>)
 //    fun getReadMarkList(userId: Long): List<Long>

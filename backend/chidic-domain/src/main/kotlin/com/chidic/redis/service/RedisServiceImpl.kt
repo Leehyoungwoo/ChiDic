@@ -106,9 +106,14 @@ class RedisServiceImpl(
     /**
      * 좋아요 개수 업데이트
      */
-    override fun updateLikeCount(feedPostId: Long, newLikeCount: Int) {
+    override fun updateLikeCount(feedPostId: Long) {
         val key = getHashKey(feedPostId)
-        redisTemplate.opsForHash<String, String>().put(key, "likeCount", newLikeCount.toString())
+        redisTemplate.opsForHash<String, String>().increment(key, "likeCount", 1)
+    }
+
+    override fun updateUnlikeCount(feedPostId: Long) {
+        val key = getHashKey(feedPostId)
+        redisTemplate.opsForHash<String, String>().increment(key, "likeCount", -1)
     }
 
     /**
