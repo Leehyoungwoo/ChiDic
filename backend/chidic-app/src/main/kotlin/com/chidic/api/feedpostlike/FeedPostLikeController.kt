@@ -31,7 +31,7 @@ class FeedPostLikeController(
         @PathVariable feedPostId: Long
     ) {
         val userId = principal.getId()
-        lockLikeService.namedLockLike(userId, feedPostId)
+        feedPostLikeService.likeFeedPost(userId, feedPostId)
     }
 
     // 내가 좋아요 했는 여부 만들어야함
@@ -42,7 +42,7 @@ class FeedPostLikeController(
         @PathVariable feedPostId: Long
     ) {
         val userId = principal.getId()
-        lockLikeService.namedLockUnlike(userId, feedPostId)
+        feedPostLikeService.unlikeFeedPost(userId, feedPostId)
     }
 }
 

@@ -41,7 +41,7 @@ class FeedKafkaConsumer(
         try {
             val event = convertMessageToEvent(message, LikeEvent::class.java)
             event.let {
-                redisService.updateLikeCount(it.feedPostId, it.likeCount)
+                redisService.updateLikeCount(it.feedPostId)
             }
         } catch (e: Exception) {
             println("Error processing like event: ${e.message}")
@@ -53,7 +53,7 @@ class FeedKafkaConsumer(
         try {
             val event = convertMessageToEvent(message, UnlikeEvent::class.java)
             event.let {
-                redisService.updateLikeCount(it.feedPostId, it.likeCount)
+                redisService.updateLikeCount(it.feedPostId)
             }
         } catch (e: Exception) {
             println("Error processing unlike event: ${e.message}")

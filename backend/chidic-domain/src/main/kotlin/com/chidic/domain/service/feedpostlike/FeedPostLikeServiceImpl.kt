@@ -46,9 +46,7 @@ class FeedPostLikeServiceImpl(
 
         val feedPostLike = findOrCreateFeedPostLike(PostLikeId(feedPostId, userId), proxyUser, proxyFeedPost)
 
-        feedPostLike.likePost()
-
-        val newLikeCount = feedPostLike.feedPost!!.likeCount
+        val newLikeCount = feedPostRepository.incrementLikeCount(feedPostId)
 
         // 핫키 판별 및 로컬 캐시 처리
         if (newLikeCount >= hotKeyThreshold) {
@@ -68,28 +66,26 @@ class FeedPostLikeServiceImpl(
     override fun unlikeFeedPost(userId: Long, feedPostId: Long) {
         val feedPostLike = feedPostLikeRepository.findById(PostLikeId(feedPostId, userId))
 
-        feedPostLike.get().unlikePost()
-
-        val likeCountAfterUnlike = feedPostLike.get().feedPost!!.likeCount
+        val likeCountAfterUnlike = feedPostRepository.decrementLikeCount(feedPostId)
 
         // 핫키 판별 및 로컬 캐시 처리
         if (likeCountAfterUnlike >= hotKeyThreshold) {
-            // 핫키인 경우 로컬 캐시 저장
+            // 핫키가 유지될 경우 ttl 갱신
             localCacheService.putCache(
                 feedPostId.toString(),
                 feedPostMapper.toFeedPostListDto(feedPostLike.get().feedPost!!)
             )
         } else {
+            // 핫키에서 탈락하면 로컬 캐시에서 제거
             if (localCacheService.getCache(feedPostId.toString()) != null) {
                 localCacheService.removeCache(feedPostId.toString())
             }
         }
 
-        val newLikeCount = feedPostLike.get().feedPost!!.likeCount
         feedKafkaProducer.sendFeedUnlikedEvent(
             UnlikeEvent(
                 feedPostId = feedPostId,
-                likeCount = newLikeCount
+                likeCount = likeCountAfterUnlike
             )
         )
     }
