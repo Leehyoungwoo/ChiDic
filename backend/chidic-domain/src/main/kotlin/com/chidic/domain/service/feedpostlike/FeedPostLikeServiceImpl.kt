@@ -1,7 +1,7 @@
 package com.chidic.domain.service.feedpostlike
 
 import com.chidic.domain.entity.FeedPost
-import com.chidic.domain.entity.FeedPostLIke
+import com.chidic.domain.entity.FeedPostLike
 import com.chidic.domain.entity.User
 import com.chidic.domain.entity.id.PostLikeId
 import com.chidic.domain.localCashe.LocalCacheService
@@ -13,7 +13,6 @@ import com.chidic.dto.FeedLikeDto
 import com.chidic.kafka.event.LikeEvent
 import com.chidic.kafka.event.UnlikeEvent
 import com.chidic.kafka.producer.FeedKafkaProducer
-import com.chidic.redis.service.RedisService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,7 +22,6 @@ class FeedPostLikeServiceImpl(
     private val userRepository: UserRepository,
     private val feedPostRepository: FeedPostRepository,
     private val feedPostLikeRepository: FeedPostLikeRepository,
-    private val redisService: RedisService,
     private val feedKafkaProducer: FeedKafkaProducer,
     private val feedPostMapper: FeedPostMapper,
     private val localCacheService: LocalCacheService
@@ -39,8 +37,17 @@ class FeedPostLikeServiceImpl(
         )
     }
 
-    @Transactional
     override fun likeFeedPost(userId: Long, feedPostId: Long) {
+        feedKafkaProducer.sendFeedLikedEvent(
+            LikeEvent(
+                userId = userId,
+                feedPostId = feedPostId
+            )
+        )
+    }
+
+    @Transactional
+    override fun createLikeAndIncrementCount(userId: Long, feedPostId: Long) {
         val proxyUser = userRepository.getReferenceById(userId)
         val proxyFeedPost = feedPostRepository.getReferenceById(feedPostId)
 
@@ -53,18 +60,22 @@ class FeedPostLikeServiceImpl(
             // 핫키인 경우 로컬 캐시에 저장
             localCacheService.putCache(feedPostId.toString(), feedPostMapper.toFeedPostListDto(feedPostLike.feedPost!!))
         }
+    }
 
-        feedKafkaProducer.sendFeedLikedEvent(
-            LikeEvent(
-                feedPostId = feedPostId,
-                likeCount = newLikeCount
+    override fun unlikeFeedPost(userId: Long, feedPostId: Long) {
+        feedKafkaProducer.sendFeedUnlikedEvent(
+            UnlikeEvent(
+                userId = userId,
+                feedPostId = feedPostId
             )
         )
     }
 
     @Transactional
-    override fun unlikeFeedPost(userId: Long, feedPostId: Long) {
-        val feedPostLike = feedPostLikeRepository.findById(PostLikeId(feedPostId, userId))
+    override fun decrementCount(userId: Long, feedPostId: Long) {
+        val feedPostLike = feedPostLikeRepository.findById(PostLikeId(feedPostId, userId)).orElse(null)
+            ?: throw IllegalStateException("좋아요가 존재하지 않습니다")
+        feedPostLike.unlikePost()
 
         val likeCountAfterUnlike = feedPostRepository.decrementLikeCount(feedPostId)
 
@@ -73,7 +84,7 @@ class FeedPostLikeServiceImpl(
             // 핫키가 유지될 경우 ttl 갱신
             localCacheService.putCache(
                 feedPostId.toString(),
-                feedPostMapper.toFeedPostListDto(feedPostLike.get().feedPost!!)
+                feedPostMapper.toFeedPostListDto(feedPostLike.feedPost!!)
             )
         } else {
             // 핫키에서 탈락하면 로컬 캐시에서 제거
@@ -81,24 +92,17 @@ class FeedPostLikeServiceImpl(
                 localCacheService.removeCache(feedPostId.toString())
             }
         }
-
-        feedKafkaProducer.sendFeedUnlikedEvent(
-            UnlikeEvent(
-                feedPostId = feedPostId,
-                likeCount = likeCountAfterUnlike
-            )
-        )
     }
 
     private fun findOrCreateFeedPostLike(
         postLikeId: PostLikeId,
         proxyUser: User,
         proxyFeedPost: FeedPost
-    ): FeedPostLIke {
+    ): FeedPostLike {
         return feedPostLikeRepository.findById(postLikeId)
             .orElseGet {
                 feedPostLikeRepository.save(
-                    FeedPostLIke(id = postLikeId).apply {
+                    FeedPostLike(id = postLikeId).apply {
                         this.user = proxyUser
                         this.feedPost = proxyFeedPost
                     }
