@@ -1,12 +1,12 @@
 package com.chidic.domain.repository
 
-import com.chidic.domain.entity.FeedPostLIke
+import com.chidic.domain.entity.FeedPostLike
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
-interface LockRepository : JpaRepository<FeedPostLIke, String> {
+interface LockRepository : JpaRepository<FeedPostLike, String> {
 
     @Query(value = "SELECT GET_LOCK(:key, 3000)", nativeQuery = true)
     fun getLock(key: String): Int

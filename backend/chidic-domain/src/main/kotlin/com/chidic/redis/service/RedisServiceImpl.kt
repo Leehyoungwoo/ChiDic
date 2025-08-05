@@ -111,6 +111,9 @@ class RedisServiceImpl(
         redisTemplate.opsForHash<String, String>().increment(key, "likeCount", 1)
     }
 
+    /**
+     *  좋아요 취소 개수 업데이트
+     */
     override fun updateUnlikeCount(feedPostId: Long) {
         val key = getHashKey(feedPostId)
         redisTemplate.opsForHash<String, String>().increment(key, "likeCount", -1)
