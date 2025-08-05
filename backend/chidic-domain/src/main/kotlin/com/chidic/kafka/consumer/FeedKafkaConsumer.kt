@@ -1,5 +1,7 @@
 package com.chidic.kafka.consumer
 
+import com.chidic.domain.repository.FeedPostRepository
+import com.chidic.domain.service.feedpostlike.FeedPostLikeService
 import com.chidic.dto.FeedPostListDto
 import com.chidic.dto.FeedPostUpdateDto
 import com.chidic.kafka.event.FeedCreateEvent
@@ -16,7 +18,8 @@ import org.springframework.stereotype.Service
 @EnableKafka
 class FeedKafkaConsumer(
     private val redisService: RedisService,
-    private val objectMapper: ObjectMapper,
+    private val feedPostLikeService: FeedPostLikeService,
+    private val objectMapper: ObjectMapper
 ) {
 
     @KafkaListener(topics = ["feed-create-events"], groupId = "feed-group")
@@ -41,7 +44,8 @@ class FeedKafkaConsumer(
         try {
             val event = convertMessageToEvent(message, LikeEvent::class.java)
             event.let {
-                redisService.updateLikeCount(it.feedPostId)
+                feedPostLikeService.createLikeAndIncrementCount(it.userId, it.feedPostId)
+                redisService.updateUnlikeCount(it.feedPostId)
             }
         } catch (e: Exception) {
             println("Error processing like event: ${e.message}")
@@ -53,6 +57,7 @@ class FeedKafkaConsumer(
         try {
             val event = convertMessageToEvent(message, UnlikeEvent::class.java)
             event.let {
+                feedPostLikeService.decrementCount(it.userId, it.feedPostId)
                 redisService.updateLikeCount(it.feedPostId)
             }
         } catch (e: Exception) {
