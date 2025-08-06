@@ -80,7 +80,7 @@ class FeedKafkaConsumer(
             val event = convertMessageToEvent(message, UnlikeEvent::class.java)
             event.let {
                 val idempotencyKey = "unlike:${it.feedPostId}:${it.userId}"
-                val acquired = redisService.setIfNotExist(idempotencyKey, "1", 5)
+                val acquired = redisService.setIfNotExist(idempotencyKey, "1", 60)
 
                 // 멱등성 보장
                 if (!acquired) return
