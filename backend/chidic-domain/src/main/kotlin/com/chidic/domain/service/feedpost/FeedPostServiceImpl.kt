@@ -150,12 +150,10 @@ class FeedPostServiceImpl(
 
             // 2. 캐시 미스 → 바로 구독 시작
             val latch = java.util.concurrent.CountDownLatch(1)
-            var fromCache: FeedPostListDto? = null
 
             val topic = redissonClient.getTopic("channel:feedpost:ready")
             val listenerId = topic.addListener(String::class.java) { _, msg ->
                 if (msg == feedPostId.toString()) {
-                    fromCache = redisService.getFeedPostFromHash(feedPostId)
                     latch.countDown()
                 }
             }
@@ -169,7 +167,6 @@ class FeedPostServiceImpl(
                         val entity = feedPostRepository.findById(feedPostId)
                             .orElseThrow { FeedPostNotFoundException(FEED_POST_NOT_FOUND.message) }
                         val dto = feedPostMapper.toFeedPostListDto(entity)
-
                         // 캐시 채우고 Pub 발행
                         redisService.saveFeedPostDtoToHash(dto)
                         redisService.publish("channel:feedpost:ready", feedPostId)
@@ -178,7 +175,8 @@ class FeedPostServiceImpl(
                     onLockFail = {
                         // 락 실패 시 → 이미 구독 중이므로 메시지 대기
                         latch.await(300, java.util.concurrent.TimeUnit.MILLISECONDS)
-                        fromCache
+                        val dto = redisService.getFeedPostFromHash(feedPostId)
+                        dto
                     }
                 )
 
