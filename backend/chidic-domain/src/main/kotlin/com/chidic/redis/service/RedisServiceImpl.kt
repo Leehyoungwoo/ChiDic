@@ -219,6 +219,6 @@ class RedisServiceImpl(
     }
 
     private fun getKey(userId: Long) = "user:feed:$userId"
-    private fun getHashKey(feedPostId: Long) = "feedpost:details:$feedPostId"
+    private fun getHashKey(feedPostId: Long) = "feedpost:details:{${feedPostId}}"
     private fun getReadMarkKey(userId: Long) = "read:feed:$userId"
 }
